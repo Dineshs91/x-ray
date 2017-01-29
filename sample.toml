@@ -1,2 +1,6 @@
 [root]
 description = "This is the root python file"
+
+[[functions]]
+parent = "root"
+

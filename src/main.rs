@@ -32,6 +32,21 @@ fn main() {
     // Check if it is root table.
     match value.get("root") {
         Some(x) => println!("{}", x),
-        None => println!("None")
+        None => println!("Root not found")
+    };
+
+    // Get all the functions defined. This will be an array.
+    let mut function_values = None;
+
+    match value.get("functions") {
+        Some(x) => function_values = Some(x),
+        None => println!("functions not found"),
+    };
+
+    println!("{:?}", function_values.unwrap());
+
+    // Loop through function values.
+    for function_val in function_values.iter() {
+        println!("{:?}", function_val);
     }
 }
