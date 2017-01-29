@@ -4,11 +4,20 @@ use std::io::prelude::*;
 use std::fs::File;
 
 
-
 fn read_toml() -> String {
-    let mut f = File::open("sample.toml").unwrap();
+    let f = File::open("sample.toml");
+
     let mut s = String::new();
-    f.read_to_string(&mut s);
+
+    let mut f = match f {
+        Ok(file) => file,
+        Err(error) => panic!("The following error occurred {:?}", error),
+    };
+
+    match f.read_to_string(&mut s) {
+        Ok(x) => println!("Read size: {}", x),
+        Err(error) => panic!("There was an error {:?}", error),
+    }
 
     // return the file content.
     s
@@ -17,7 +26,6 @@ fn read_toml() -> String {
 
 fn main() {
     let toml_file_content = read_toml();
-    println!("{}", toml_file_content);
 
     let value = toml::Parser::new(&toml_file_content).parse().unwrap();
 
