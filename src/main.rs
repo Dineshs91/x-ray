@@ -1,5 +1,7 @@
 extern crate toml;
 
+mod code_generator;
+
 use std::io::prelude::*;
 use std::fs::File;
 
