@@ -51,4 +51,6 @@ fn main() {
     for function_val in function_values.iter() {
         println!("{:?}", function_val);
     }
+
+    println!("{}", code_generator::function_template("display", "This is the display function"));
 }

@@ -1,13 +1,34 @@
+extern crate rustache;
+
 use std::io::prelude::*;
+use std::io::Cursor;
 use std::fs::File;
+use self::rustache::{HashBuilder, Render};
 
 
 pub fn templates() -> String {
     // Return the corresponding template Ex: class, function, method etc.
 }
 
-fn function_template(func_name, func_description) -> String {
+pub fn function_template(func_name: &str, func_description: &str) -> String {
 	// return function template
+	let function_template = r#"
+def {{ func_name }}():
+    """
+    {{ func_description }}
+    """
+    pass
+	"#;
+
+	let mut data = HashBuilder::new();
+	data = data.insert("func_name", func_name);
+	data = data.insert("func_description", func_description);
+
+	let mut out = Cursor::new(Vec::new());
+	data.render(function_template, &mut out);
+
+	// return the filled template.
+	String::from_utf8(out.into_inner()).unwrap()
 }
 
 fn class_template() -> String {
