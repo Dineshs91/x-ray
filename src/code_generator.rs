@@ -10,29 +10,39 @@ pub fn templates() -> String {
     // Return the corresponding template Ex: class, function, method etc.
 }
 
-pub fn function_template(func_name: &str, func_description: &str) -> String {
+pub fn function_template(func_name: &str, func_desc: &str) -> String {
 	// return function template
 	let function_template = r#"
 def {{ func_name }}():
     """
-    {{ func_description }}
+    {{ func_desc }}
     """
     pass
 	"#;
 
 	let mut data = HashBuilder::new();
 	data = data.insert("func_name", func_name);
-	data = data.insert("func_description", func_description);
+	data = data.insert("func_desc", func_desc);
 
 	let mut out = Cursor::new(Vec::new());
 	data.render(function_template, &mut out);
 
 	// return the filled template.
+	// TODO: Handle error's
 	String::from_utf8(out.into_inner()).unwrap()
 }
 
-fn class_template() -> String {
+fn class_template(class_name: &str, class_desc: &str) -> String {
 	// return class template
+	let class_template = r#"
+class {{ class_name }}:
+    """
+    {{ class_desc }}
+    """
+
+    def __init__(self):
+        pass
+	"#;
 }
 
 fn method_template() -> String {
