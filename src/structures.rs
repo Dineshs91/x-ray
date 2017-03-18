@@ -1,10 +1,7 @@
-use structures;
-
 #[derive(Debug)]
 #[derive(Deserialize)]
 pub struct Config {
 	pub root: Root,
-	//pub functions: Function
 }
 
 // project root

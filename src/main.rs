@@ -10,7 +10,6 @@ use std::io::prelude::*;
 use std::fs::File;
 
 use structures::{Config};
-use toml::Value;
 
 
 fn read_toml() -> String {
