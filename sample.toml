@@ -5,6 +5,7 @@ filename = "main.py"
 
 [[root.modules]]
 name = "display"
+description = "This is the display module"
 
 [[root.modules.functions]]
 name = "display"

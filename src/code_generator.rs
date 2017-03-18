@@ -3,6 +3,7 @@ extern crate rustache;
 use std::io::prelude::*;
 use std::io::Cursor;
 use std::fs::File;
+use std::path::Path;
 use self::rustache::{HashBuilder, Render};
 use structures::Function;
 
@@ -73,4 +74,17 @@ pub fn write_to_file(filename: &str, content: &str) {
 	// Args: file name, the content of the file.
 	//
 	// filename & content will be &str since we won't be manipulating it.
+	let filename_extension = ".py";
+	let filename = filename.to_string() + filename_extension;
+
+	let path = Path::new(&filename);
+	let mut file = match File::create(&path) {
+		Err(e) => panic!("Error occurred while trying to create file {}", e),
+		Ok(file) => file,
+	};
+
+	match file.write_all(content.as_bytes()) {
+		Err(e) => println!("Error occurred while trying to write to file {}", e),
+		Ok(_) => println!("Successfully written content to a file"),
+	}
 }

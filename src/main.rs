@@ -10,25 +10,26 @@ use std::io::prelude::*;
 use std::fs::File;
 
 use structures::{Config};
+use code_generator::{write_to_file, function_template};
 
 
 fn read_toml() -> String {
-    let f = File::open("sample.toml");
+    let file = File::open("sample.toml");
 
-    let mut s = String::new();
+    let mut file_content = String::new();
 
-    let mut f = match f {
+    let mut file = match file {
         Ok(file) => file,
         Err(error) => panic!("The following error occurred {:?}", error),
     };
 
-    match f.read_to_string(&mut s) {
+    match file.read_to_string(&mut file_content) {
         Ok(x) => println!("Read size: {}", x),
         Err(error) => panic!("There was an error {:?}", error),
     }
 
     // return the file content.
-    s
+    file_content
 }
 
 
@@ -37,4 +38,19 @@ fn main() {
     let config: Config = toml::from_str(&toml_file_content).unwrap();
 
     println!("{:?}", config);
+    write_to_file("sample.py", "This is the content");
+
+    // Root have modules
+    // Modules have functions
+    let root = config.root;
+    
+    for module in root.modules {
+        let functions = module.functions;
+        let ref filename = module.name;
+
+        for function in functions {
+            let content = function_template(function);
+            write_to_file(&filename, &content);
+        }
+    }
 }
