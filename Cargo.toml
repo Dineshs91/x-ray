@@ -4,6 +4,8 @@ version = "0.1.0"
 authors = ["dinesh <dineshpy07@gmail.com>"]
 
 [dependencies]
-toml = "0.2"
+toml = "0.3"
 rustc-serialize = "0.3"
 rustache = "^0.1"
+serde = "0.9"
+serde_derive = "0.9"
