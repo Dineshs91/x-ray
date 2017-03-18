@@ -1,9 +1,16 @@
+#[macro_use]
+extern crate serde_derive;
+extern crate serde;
 extern crate toml;
 
 mod code_generator;
+mod structures;
 
 use std::io::prelude::*;
 use std::fs::File;
+
+use structures::{Config};
+use toml::Value;
 
 
 fn read_toml() -> String {
@@ -28,29 +35,7 @@ fn read_toml() -> String {
 
 fn main() {
     let toml_file_content = read_toml();
+    let config: Config = toml::from_str(&toml_file_content).unwrap();
 
-    let value = toml::Parser::new(&toml_file_content).parse().unwrap();
-
-    // Check if it is root table.
-    match value.get("root") {
-        Some(x) => println!("{}", x),
-        None => println!("Root not found")
-    };
-
-    // Get all the functions defined. This will be an array.
-    let mut function_values = None;
-
-    match value.get("functions") {
-        Some(x) => function_values = Some(x),
-        None => println!("functions not found"),
-    };
-
-    println!("{:?}", function_values.unwrap());
-
-    // Loop through function values.
-    for function_val in function_values.iter() {
-        println!("{:?}", function_val);
-    }
-
-    println!("{}", code_generator::function_template("display", "This is the display function"));
+    println!("{:?}", config);
 }
