@@ -1,34 +1,34 @@
 use structures;
 
-
-// project root
-struct Root {
-	name: &str,
-	description: Option<&str>,
+#[derive(Debug)]
+#[derive(Deserialize)]
+pub struct Config {
+	pub root: Root,
+	//pub functions: Function
 }
 
-// python package, any directory with a __init__ file.
-struct Package {
-	name: &str,
-	description: Option<&str>,
+// project root
+#[derive(Debug)]
+#[derive(Deserialize)]
+pub struct Root {
+	pub name: String,
+	pub description: Option<String>,
+	pub modules: Vec<Module>,
 }
 
 // python module, any python file.
-struct Module {
-	name: &str,
-    description: Option<&str>,
+#[derive(Debug)]
+#[derive(Deserialize)]
+pub struct Module {
+	pub name: String,
+    pub description: Option<String>,
+	pub functions: Vec<Function>,
 }
 
 // structure for a forming python function.
-struct Function {
-    name: &str,
-    description: Option<&str>, // Option
-    module: Module,
-}
-
-// structure for a forming python class.
-struct Class {
-	name: &str,
-	description: Option<&str>,
-	module: Module,
+#[derive(Debug)]
+#[derive(Deserialize)]
+pub struct Function {
+    pub name: String,
+    pub description: Option<String>,
 }
