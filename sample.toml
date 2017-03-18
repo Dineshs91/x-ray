@@ -1,8 +1,21 @@
 [root]
+name = "root"
 description = "This is the root python file"
 filename = "main.py"
 
-[[functions]]
-parent = "root"
+[[root.modules]]
+name = "display"
+
+[[root.modules.functions]]
 name = "display"
 parameters = ["msg"]
+description = "this is the display function"
+
+[[root.modules]]
+name = "api"
+description = "This is the api module"
+
+[[root.modules.functions]]
+name = "create_api"
+parameters = ["id"]
+description = "This is the create api function"
