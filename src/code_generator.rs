@@ -29,13 +29,10 @@ pub fn function_template(function: Function) -> String {
 
 	let function_template = r#"
 def {{func_name}}():
-	{{#func_bool}}
-    """
+    {{#func_bool}}"""
     {{func_desc}}
     """
-    {{/func_bool}}
-    pass
-	"#;
+    {{/func_bool}}pass"#;
 
 	let mut data = HashBuilder::new();
 	data = data.insert("func_name", function.name);
@@ -57,10 +54,8 @@ class {{ class_name }}:
     """
     {{ class_desc }}
     """
-
     def __init__(self):
-        pass
-	"#;
+        pass"#;
 
 	class_template.to_string()
 }
