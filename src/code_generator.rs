@@ -6,9 +6,9 @@ use std::fs::File;
 use self::rustache::{HashBuilder, Render};
 use structures::Function;
 
-pub fn templates() -> String {
-    // Return the corresponding template Ex: class, function, method etc.
-}
+// pub fn templates() -> String {
+//     // Return the corresponding template Ex: class, function, method etc.
+// }
 
 
 pub fn function_template(function: Function) -> String {
@@ -49,29 +49,6 @@ def {{func_name}}():
 	String::from_utf8(out.into_inner()).unwrap()
 }
 
-
-pub fn function_template(func_name: &str, func_desc: &str) -> String {
-	// return function template
-	let function_template = r#"
-def {{ func_name }}():
-    """
-    {{ func_desc }}
-    """
-    pass
-	"#;
-
-	let mut data = HashBuilder::new();
-	data = data.insert("func_name", func_name);
-	data = data.insert("func_desc", func_desc);
-
-	let mut out = Cursor::new(Vec::new());
-	data.render(function_template, &mut out);
-
-	// return the filled template.
-	// TODO: Handle error's
-	String::from_utf8(out.into_inner()).unwrap()
-}
-
 fn class_template(class_name: &str, class_desc: &str) -> String {
 	// return class template
 	let class_template = r#"
@@ -83,11 +60,13 @@ class {{ class_name }}:
     def __init__(self):
         pass
 	"#;
+
+	class_template.to_string()
 }
 
-fn method_template() -> String {
-	// return method template
-}
+// fn method_template() -> String {
+// 	// return method template
+// }
 
 pub fn write_to_file(filename: &str, content: &str) {
 	// Write the python source to file.
