@@ -4,11 +4,51 @@ use std::io::prelude::*;
 use std::io::Cursor;
 use std::fs::File;
 use self::rustache::{HashBuilder, Render};
-
+use structures::Function;
 
 pub fn templates() -> String {
     // Return the corresponding template Ex: class, function, method etc.
 }
+
+
+pub fn function_template(function: Function) -> String {
+	// return function template
+	let mut func_bool = false;
+	// let func_desc = function.description.unwrap();
+	let func_desc = match function.description {
+		Some(val) => {
+			func_bool = true;
+			val
+		},
+		None => {
+			func_bool = false;
+			String::new()
+		},
+	};
+
+	let function_template = r#"
+def {{func_name}}():
+	{{#func_bool}}
+    """
+    {{func_desc}}
+    """
+    {{/func_bool}}
+    pass
+	"#;
+
+	let mut data = HashBuilder::new();
+	data = data.insert("func_name", function.name);
+	data = data.insert("func_desc", func_desc);
+	data = data.insert("func_bool", func_bool);
+
+	let mut out = Cursor::new(Vec::new());
+	data.render(function_template, &mut out);
+
+	// return the filled template.
+	// TODO: Handle error's
+	String::from_utf8(out.into_inner()).unwrap()
+}
+
 
 pub fn function_template(func_name: &str, func_desc: &str) -> String {
 	// return function template
