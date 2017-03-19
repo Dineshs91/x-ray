@@ -3,7 +3,7 @@ extern crate serde_derive;
 extern crate serde;
 extern crate toml;
 
-mod code_generator;
+mod template;
 mod structures;
 mod util;
 
@@ -11,7 +11,7 @@ use std::io::prelude::*;
 use std::fs::File;
 
 use structures::{Config};
-use code_generator::{class_template, function_template};
+use template::{class_template, function_template};
 use util::{write_to_file, create_package};
 
 
