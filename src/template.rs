@@ -53,6 +53,35 @@ def {{func_name}}({{parameters}}):
 	String::from_utf8(out.into_inner()).unwrap()
 }
 
+pub fn method_template(method: Function) -> String {
+    let method_template = r#"
+	def {{ method_name }}(self, ):
+		{{#method_desc_bool}}"""
+		{{ method_desc }}
+		"""{{/method_desc_bool}}
+        pass
+	"#;
+
+	let mut method_template_string = String::new();
+
+    let method_desc_bool = false;
+
+    let method_desc = match method.description {
+        Some(val) => val,
+        None => String::new(),
+    };
+
+    let mut method_data = HashBuilder::new();
+    method_data = method_data.insert("method_name", method.name);
+    method_data = method_data.insert("method_desc_bool", true);
+    method_data = method_data.insert("method_desc", method_desc);
+
+    let mut method_out = Cursor::new(Vec::new());
+    method_data.render(&method_template, &mut method_out);
+
+    String::from_utf8(method_out.into_inner()).unwrap()
+}
+
 pub fn class_template(class: Class) -> String {
 	let mut class_desc_bool = false;
 	let class_desc = match class.description {
@@ -75,34 +104,11 @@ class {{ class_name }}:
         pass
     "#;
 
-	let method_template = r#"
-	def {{ method_name }}(self, ):
-		{{#method_desc_bool}}"""
-		{{ method_desc }}
-		"""{{/method_desc_bool}}
-        pass
-	"#;
-
 	let mut method_template_string = String::new();
 	let methods = class.methods;
 
 	for method in methods {
-		let method_desc_bool = false;
-
-		let method_desc = match method.description {
-			Some(val) => val,
-			None => String::new(),
-		};
-
-		let mut method_data = HashBuilder::new();
-		method_data = method_data.insert("method_name", method.name);
-		method_data = method_data.insert("method_desc_bool", true);
-		method_data = method_data.insert("method_desc", method_desc);
-
-		let mut method_out = Cursor::new(Vec::new());
-		method_data.render(&method_template, &mut method_out);
-
-		method_template_string += &String::from_utf8(method_out.into_inner()).unwrap();
+		method_template_string += &method_template(method);
 	}
 
 	let mut data = HashBuilder::new();
@@ -136,4 +142,9 @@ def display():
 	"#;
 
 	assert_eq!(function_template_content, expected_function_template_content);
+}
+
+#[test]
+fn test_class_template() {
+
 }
