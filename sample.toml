@@ -14,6 +14,10 @@ description = "This is the display module"
 name = "animal"
 description = "This is the animal class"
 
+[[root.packages.modules.classes.methods]]
+name = "get_animal"
+description = "Get the animal instance of this object"
+
 [[root.packages.modules.functions]]
 name = "display"
 parameters = ["msg"]

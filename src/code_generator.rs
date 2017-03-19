@@ -4,9 +4,8 @@ use std::io::prelude::*;
 use std::io::Cursor;
 use std::fs;
 use std::fs::File;
-use std::fs::OpenOptions;
 use std::path::Path;
-use self::rustache::{HashBuilder, VecBuilder, Render};
+use self::rustache::{HashBuilder, Render};
 use structures::{Class, Function};
 
 const FILE_EXTENSION:&'static str = ".py";
@@ -81,9 +80,37 @@ class {{ class_name }}:
     """{{/class_desc_bool}}
     def __init__(self):
         pass
+    "#;
+
+	let method_template = r#"
+	def {{ method_name }}(self, ):
+		{{#method_desc_bool}}"""
+		{{ method_desc }}
+		"""{{/method_desc_bool}}
+        pass
 	"#;
 
-	// TODO: iterate through methods of the class.
+	let mut method_template_string = String::new();
+	let methods = class.methods;
+
+	for method in methods {
+		let method_desc_bool = false;
+
+		let method_desc = match method.description {
+			Some(val) => val,
+			None => String::new(),
+		};
+
+		let mut method_data = HashBuilder::new();
+		method_data = method_data.insert("method_name", method.name);
+		method_data = method_data.insert("method_desc_bool", true);
+		method_data = method_data.insert("method_desc", method_desc);
+
+		let mut method_out = Cursor::new(Vec::new());
+		method_data.render(&method_template, &mut method_out);
+
+		method_template_string += &String::from_utf8(method_out.into_inner()).unwrap();
+	}
 
 	let mut data = HashBuilder::new();
 	data = data.insert("class_name", class.name);
@@ -94,12 +121,8 @@ class {{ class_name }}:
 	data.render(class_template, &mut out);
 
 	// return the filled class template
-	String::from_utf8(out.into_inner()).unwrap()
+	String::from_utf8(out.into_inner()).unwrap() + &method_template_string
 }
-
-// fn method_template() -> String {
-// 	// return method template
-// }
 
 pub fn write_to_file(path: &str, filename: &str, content: &str) {
 	// Write the python source to file.
@@ -124,11 +147,10 @@ pub fn create_package(package_name: &str) {
 	let package_name = package_name.to_string();
 	let init_file_path = INIT_FILE;
 
-	// Create package directory
 	fs::create_dir(&package_name);
 
 	let path = Path::new(&package_name).join(init_file_path);
-	let mut file = match File::create(&path) {
+	match File::create(&path) {
 		Err(e) => panic!("Error occurred while trying to create file {}", e),
 		Ok(file) => file,
 	};
