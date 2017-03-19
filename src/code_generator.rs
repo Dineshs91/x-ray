@@ -5,39 +5,34 @@ use std::io::Cursor;
 use std::fs::File;
 use std::path::Path;
 use self::rustache::{HashBuilder, Render};
-use structures::Function;
-
-// pub fn templates() -> String {
-//     // Return the corresponding template Ex: class, function, method etc.
-// }
+use structures::{Class, Function};
 
 
 pub fn function_template(function: Function) -> String {
 	// return function template
-	let mut func_bool = false;
-	// let func_desc = function.description.unwrap();
+	let mut func_desc_bool = false;
 	let func_desc = match function.description {
 		Some(val) => {
-			func_bool = true;
+			func_desc_bool = true;
 			val
 		},
 		None => {
-			func_bool = false;
+			func_desc_bool = false;
 			String::new()
 		},
 	};
 
 	let function_template = r#"
 def {{func_name}}():
-    {{#func_bool}}"""
+    {{#func_desc_bool}}"""
     {{func_desc}}
-    """
-    {{/func_bool}}pass"#;
+    """{{/func_desc_bool}}
+    pass"#;
 
 	let mut data = HashBuilder::new();
 	data = data.insert("func_name", function.name);
 	data = data.insert("func_desc", func_desc);
-	data = data.insert("func_bool", func_bool);
+	data = data.insert("func_desc_bool", func_desc_bool);
 
 	let mut out = Cursor::new(Vec::new());
 	data.render(function_template, &mut out);
@@ -47,17 +42,39 @@ def {{func_name}}():
 	String::from_utf8(out.into_inner()).unwrap()
 }
 
-fn class_template(class_name: &str, class_desc: &str) -> String {
-	// return class template
+pub fn class_template(class: Class) -> String {
+	let mut class_desc_bool = false;
+	let class_desc = match class.description {
+		Some(val) => {
+			class_desc_bool = true;
+			val
+		},
+		None => {
+			class_desc_bool = false;
+			String::new()
+		}
+	};
+
 	let class_template = r#"
 class {{ class_name }}:
-    """
+    {{#class_desc_bool}}"""
     {{ class_desc }}
-    """
+    """{{/class_desc_bool}}
     def __init__(self):
         pass"#;
 
-	class_template.to_string()
+	// TODO: iterate through methods of the class.
+
+	let mut data = HashBuilder::new();
+	data = data.insert("class_name", class.name);
+	data = data.insert("class_desc", class_desc);
+	data = data.insert("class_desc_bool", class_desc_bool);
+
+	let mut out = Cursor::new(Vec::new());
+	data.render(class_template, &mut out);
+
+	// return the filled class template
+	String::from_utf8(out.into_inner()).unwrap()
 }
 
 // fn method_template() -> String {

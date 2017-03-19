@@ -7,6 +7,10 @@ filename = "main.py"
 name = "display"
 description = "This is the display module"
 
+[[root.modules.classes]]
+name = "animal"
+description = "This is the animal class"
+
 [[root.modules.functions]]
 name = "display"
 parameters = ["msg"]

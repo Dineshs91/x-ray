@@ -33,6 +33,9 @@ pub struct Module {
 #[derive(Deserialize)]
 pub struct Class {
 	pub name: String,
+	pub description: Option<String>,
+
+	#[serde(default)]
 	pub methods: Vec<Function>,
 }
 
