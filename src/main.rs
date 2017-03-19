@@ -10,7 +10,7 @@ use std::io::prelude::*;
 use std::fs::File;
 
 use structures::{Config};
-use code_generator::{write_to_file, class_template, function_template};
+use code_generator::{write_to_file, create_package, class_template, function_template};
 
 
 fn read_toml() -> String {
@@ -39,26 +39,31 @@ fn main() {
 
     println!("{:?}", config);
 
-    // Root have modules
+    // Root have packages
+    // Packages have modules
     // Modules have functions
     let root = config.root;
-    
-    for module in root.modules {
-        let functions = module.functions;
-        let ref filename = module.name;
 
-        let classes = module.classes;
-        let mut content = String::new();
+    for package in root.packages {
+        let modules = package.modules;
 
-        for class in classes {
-            content += &class_template(class);
+        for module in root.modules {
+            let functions = module.functions;
+            let ref filename = module.name;
+
+            let classes = module.classes;
+            let mut content = String::new();
+
+            for class in classes {
+                content += &class_template(class);
+                write_to_file(&filename, &content);
+            }
+
+            for function in functions {
+                content += &function_template(function);
+            }
+
             write_to_file(&filename, &content);
         }
-
-        for function in functions {
-            content += &function_template(function);
-        }
-
-        write_to_file(&filename, &content);
     }
 }

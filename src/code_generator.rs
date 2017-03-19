@@ -2,11 +2,15 @@ extern crate rustache;
 
 use std::io::prelude::*;
 use std::io::Cursor;
+use std::fs;
 use std::fs::File;
 use std::fs::OpenOptions;
 use std::path::Path;
 use self::rustache::{HashBuilder, VecBuilder, Render};
 use structures::{Class, Function};
+
+const FILE_EXTENSION:&'static str = ".py";
+const INIT_FILE:&'static str = "__init__.py";
 
 
 pub fn function_template(function: Function) -> String {
@@ -102,8 +106,7 @@ pub fn write_to_file(filename: &str, content: &str) {
 	// Args: file name, the content of the file.
 	//
 	// filename & content will be &str since we won't be manipulating it.
-	let filename_extension = ".py";
-	let filename = filename.to_string() + filename_extension;
+	let filename = filename.to_string() + FILE_EXTENSION;
 
 	let path = Path::new(&filename);
 	let mut file = match File::create(&path) {
@@ -115,4 +118,18 @@ pub fn write_to_file(filename: &str, content: &str) {
 		Err(e) => println!("Error occurred while trying to write to file {}", e),
 		Ok(_) => println!("Successfully written content to a file"),
 	}
+}
+
+pub fn create_package(package_name: &str) {
+	let package_name = package_name.to_string();
+	let init_file_path = INIT_FILE;
+
+	// Create package directory
+	fs::create_dir(&package_name);
+
+	let path = Path::new(&package_name).join(init_file_path);
+	let mut file = match File::create(&path) {
+		Err(e) => panic!("Error occurred while trying to create file {}", e),
+		Ok(file) => file,
+	};
 }

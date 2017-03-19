@@ -15,6 +15,16 @@ pub struct Root {
 	pub modules: Vec<Module>,
 }
 
+// python package. Any directory which has a __init__.py file.
+#[derive(Debug)]
+#[derive(Deserialize)]
+pub struct Package {
+	pub name: String,
+
+	#[serde(default)]
+	pub modules: Vec<Class>
+}
+
 // python module, any python file.
 #[derive(Debug)]
 #[derive(Deserialize)]

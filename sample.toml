@@ -3,24 +3,27 @@ name = "root"
 description = "This is the root python file"
 filename = "main.py"
 
-[[root.modules]]
+[[root.packages]]
+name = "sample"
+
+[[root.packages.modules]]
 name = "display"
 description = "This is the display module"
 
-[[root.modules.classes]]
+[[root.packages.modules.classes]]
 name = "animal"
 description = "This is the animal class"
 
-[[root.modules.functions]]
+[[root.packages.modules.functions]]
 name = "display"
 parameters = ["msg"]
 description = "this is the display function"
 
-[[root.modules]]
+[[root.packages.modules]]
 name = "api"
 description = "This is the api module"
 
-[[root.modules.functions]]
+[[root.packages.modules.functions]]
 name = "create_api"
 parameters = ["id", "new"]
 description = "This is the create api function"
