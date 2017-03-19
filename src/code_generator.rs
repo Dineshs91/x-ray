@@ -3,6 +3,7 @@ extern crate rustache;
 use std::io::prelude::*;
 use std::io::Cursor;
 use std::fs::File;
+use std::fs::OpenOptions;
 use std::path::Path;
 use self::rustache::{HashBuilder, Render};
 use structures::{Class, Function};
@@ -90,7 +91,7 @@ pub fn write_to_file(filename: &str, content: &str) {
 	let filename = filename.to_string() + filename_extension;
 
 	let path = Path::new(&filename);
-	let mut file = match File::create(&path) {
+	let mut file = match OpenOptions::new().create(true).append(true).open(&path) {
 		Err(e) => panic!("Error occurred while trying to create file {}", e),
 		Ok(file) => file,
 	};

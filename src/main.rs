@@ -55,7 +55,7 @@ fn main() {
 
         for function in functions {
             let content = function_template(function);
-            //write_to_file(&filename, &content);
+            write_to_file(&filename, &content);
         }
     }
 }
