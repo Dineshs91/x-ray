@@ -48,7 +48,7 @@ def {{func_name}}({{parameters}}):
 	let mut data = HashBuilder::new();
 	data = data.insert("parameters", function_parameters);
 	data = data.insert("func_name", function.name);
-	
+
 	data = data.insert("func_desc", func_desc);
 	data = data.insert("func_desc_bool", func_desc_bool);
 
