@@ -1,3 +1,5 @@
+extern crate serde;
+
 #[derive(Debug)]
 #[derive(Deserialize)]
 pub struct Config {
@@ -20,6 +22,15 @@ pub struct Module {
 	pub name: String,
     pub description: Option<String>,
 	pub functions: Vec<Function>,
+	#[serde(default)]
+	pub classes: Vec<Class>,
+}
+
+#[derive(Debug)]
+#[derive(Deserialize)]
+pub struct Class {
+	pub name: String,
+	pub methods: Vec<Function>,
 }
 
 // structure for a forming python function.
