@@ -21,8 +21,10 @@ pub struct Root {
 pub struct Module {
 	pub name: String,
     pub description: Option<String>,
+
 	#[serde(default)]
 	pub functions: Vec<Function>,
+
 	#[serde(default)]
 	pub classes: Vec<Class>,
 }
