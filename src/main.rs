@@ -5,12 +5,14 @@ extern crate toml;
 
 mod code_generator;
 mod structures;
+mod util;
 
 use std::io::prelude::*;
 use std::fs::File;
 
 use structures::{Config};
-use code_generator::{write_to_file, create_package, class_template, function_template};
+use code_generator::{class_template, function_template};
+use util::{write_to_file, create_package};
 
 
 fn read_toml() -> String {
