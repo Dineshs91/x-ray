@@ -37,9 +37,6 @@ fn main() {
     let toml_file_content = read_toml();
     let config: Config = toml::from_str(&toml_file_content).unwrap();
 
-    println!("{:?}", config);
-    write_to_file("sample.py", "This is the content");
-
     // Root have modules
     // Modules have functions
     let root = config.root;
