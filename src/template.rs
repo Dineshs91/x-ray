@@ -123,7 +123,7 @@ class {{ class_name }}:
 	String::from_utf8(out.into_inner()).unwrap() + &method_template_string
 }
 
-// Unit testing
+// Unit tests.
 #[test]
 fn test_function_template() {
 	let function = Function {
@@ -146,5 +146,21 @@ def display():
 
 #[test]
 fn test_class_template() {
+    let class = Class {
+        name: "Animal".to_string(),
+        description: Some("This is the animal class.".to_string()),
+        methods: Vec::new()
+    };
 
+    let class_template_content = class_template(class);
+    let expected_class_template_content = r#"
+class Animal:
+    """
+    This is the animal class.
+    """
+    def __init__(self):
+        pass
+    "#;
+
+    assert_eq!(class_template_content, expected_class_template_content);
 }
