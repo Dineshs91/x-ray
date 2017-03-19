@@ -19,6 +19,9 @@ name = "display"
 parameters = ["msg"]
 description = "this is the display function"
 
+[[root.packages]]
+name = "tests"
+
 [[root.packages.modules]]
 name = "api"
 description = "This is the api module"
