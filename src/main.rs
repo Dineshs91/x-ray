@@ -45,6 +45,10 @@ fn main() {
     let root = config.root;
 
     for package in root.packages {
+        create_package(&package.name);
+
+        let path = package.name;
+
         let modules = package.modules;
 
         for module in modules {
@@ -56,14 +60,14 @@ fn main() {
 
             for class in classes {
                 content += &class_template(class);
-                write_to_file(&filename, &content);
+                write_to_file(&path, &filename, &content);
             }
 
             for function in functions {
                 content += &function_template(function);
             }
 
-            write_to_file(&filename, &content);
+            write_to_file(&path, &filename, &content);
         }
     }
 }

@@ -101,14 +101,14 @@ class {{ class_name }}:
 // 	// return method template
 // }
 
-pub fn write_to_file(filename: &str, content: &str) {
+pub fn write_to_file(path: &str, filename: &str, content: &str) {
 	// Write the python source to file.
 	// Args: file name, the content of the file.
 	//
 	// filename & content will be &str since we won't be manipulating it.
 	let filename = filename.to_string() + FILE_EXTENSION;
 
-	let path = Path::new(&filename);
+	let path = Path::new(&path).join(filename);
 	let mut file = match File::create(&path) {
 		Err(e) => panic!("Error occurred while trying to create file {}", e),
 		Ok(file) => file,
