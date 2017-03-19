@@ -116,3 +116,24 @@ class {{ class_name }}:
 	// return the filled class template
 	String::from_utf8(out.into_inner()).unwrap() + &method_template_string
 }
+
+// Unit testing
+#[test]
+fn test_function_template() {
+	let function = Function {
+		name: "display".to_string(),
+		description: Some("This is the display function.".to_string()),
+		parameters: Vec::new()
+	};
+
+	let function_template_content = function_template(function);
+	let expected_function_template_content = r#"
+def display():
+    """
+    This is the display function.
+    """
+    pass
+	"#;
+
+	assert_eq!(function_template_content, expected_function_template_content);
+}

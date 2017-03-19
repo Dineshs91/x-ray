@@ -24,7 +24,7 @@ parameters = ["msg"]
 description = "this is the display function"
 
 [[root.packages]]
-name = "tests"
+name = "api"
 
 [[root.packages.modules]]
 name = "api"
