@@ -28,7 +28,8 @@ def {{func_name}}():
     {{#func_desc_bool}}"""
     {{func_desc}}
     """{{/func_desc_bool}}
-    pass"#;
+    pass
+	"#;
 
 	let mut data = HashBuilder::new();
 	data = data.insert("func_name", function.name);
@@ -62,7 +63,8 @@ class {{ class_name }}:
     {{ class_desc }}
     """{{/class_desc_bool}}
     def __init__(self):
-        pass"#;
+        pass
+	"#;
 
 	// TODO: iterate through methods of the class.
 
@@ -91,7 +93,7 @@ pub fn write_to_file(filename: &str, content: &str) {
 	let filename = filename.to_string() + filename_extension;
 
 	let path = Path::new(&filename);
-	let mut file = match OpenOptions::new().create(true).append(true).open(&path) {
+	let mut file = match File::create(&path) {
 		Err(e) => panic!("Error occurred while trying to create file {}", e),
 		Ok(file) => file,
 	};

@@ -48,14 +48,18 @@ fn main() {
         let ref filename = module.name;
 
         let classes = module.classes;
+        let mut content = String::new();
+
         for class in classes {
-            let content = class_template(class);
+            content += &class_template(class);
             write_to_file(&filename, &content);
         }
 
         for function in functions {
-            let content = function_template(function);
-            write_to_file(&filename, &content);
+            content += &function_template(function);
+            
         }
+
+        write_to_file(&filename, &content);
     }
 }
