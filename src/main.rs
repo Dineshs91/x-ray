@@ -47,7 +47,7 @@ fn main() {
     for package in root.packages {
         let modules = package.modules;
 
-        for module in root.modules {
+        for module in modules {
             let functions = module.functions;
             let ref filename = module.name;
 

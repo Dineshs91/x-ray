@@ -12,6 +12,11 @@ pub struct Config {
 pub struct Root {
 	pub name: String,
 	pub description: Option<String>,
+
+	#[serde(default)]
+	pub packages: Vec<Package>,
+
+	#[serde(default)]
 	pub modules: Vec<Module>,
 }
 
@@ -22,7 +27,7 @@ pub struct Package {
 	pub name: String,
 
 	#[serde(default)]
-	pub modules: Vec<Class>
+	pub modules: Vec<Module>,
 }
 
 // python module, any python file.
