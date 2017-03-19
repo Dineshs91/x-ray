@@ -5,7 +5,7 @@ use std::io::Cursor;
 use std::fs::File;
 use std::fs::OpenOptions;
 use std::path::Path;
-use self::rustache::{HashBuilder, Render};
+use self::rustache::{HashBuilder, VecBuilder, Render};
 use structures::{Class, Function};
 
 
@@ -24,15 +24,28 @@ pub fn function_template(function: Function) -> String {
 	};
 
 	let function_template = r#"
-def {{func_name}}():
+def {{func_name}}({{parameters}}):
     {{#func_desc_bool}}"""
     {{func_desc}}
     """{{/func_desc_bool}}
     pass
 	"#;
 
+	let mut function_parameters = String::new();
+	let mut i:i32 = 0;
+
+	for parameter in function.parameters {
+		if i != 0 {
+			function_parameters += ", "
+		}
+		function_parameters += &parameter;
+		i += 1;
+	}
+
 	let mut data = HashBuilder::new();
+	data = data.insert("parameters", function_parameters);
 	data = data.insert("func_name", function.name);
+	
 	data = data.insert("func_desc", func_desc);
 	data = data.insert("func_desc_bool", func_desc_bool);
 

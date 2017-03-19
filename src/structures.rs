@@ -45,4 +45,7 @@ pub struct Class {
 pub struct Function {
     pub name: String,
     pub description: Option<String>,
+
+	#[serde(default)]
+	pub parameters: Vec<String>,
 }

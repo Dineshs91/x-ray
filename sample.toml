@@ -22,5 +22,5 @@ description = "This is the api module"
 
 [[root.modules.functions]]
 name = "create_api"
-parameters = ["id"]
+parameters = ["id", "new"]
 description = "This is the create api function"
