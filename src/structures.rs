@@ -1,5 +1,8 @@
 extern crate serde;
 
+
+use regex::Regex;
+
 #[derive(Debug)]
 #[derive(Deserialize)]
 pub struct Config {
@@ -63,4 +66,16 @@ pub struct Function {
 
 	#[serde(default)]
 	pub parameters: Vec<String>,
+}
+
+impl Validate for Function {
+    fn validate_case(&self) -> bool {
+        // function name will be snake case.
+        let re = Regex::new(r"^[a-z_]+$").unwrap();
+        re.is_match(&self.name)
+    }
+}
+
+pub trait Validate {
+    fn validate_case(&self) -> bool;
 }

@@ -2,6 +2,7 @@
 extern crate serde_derive;
 extern crate serde;
 extern crate toml;
+extern crate regex;
 
 mod template;
 mod structures;
@@ -10,7 +11,7 @@ mod util;
 use std::io::prelude::*;
 use std::fs::File;
 
-use structures::{Config};
+use structures::{Config, Root, Module, Validate};
 use template::{class_template, function_template};
 use util::{write_to_file, create_package};
 
@@ -34,6 +35,27 @@ fn read_toml() -> String {
     file_content
 }
 
+fn validate (root: Root) -> Root {
+    // Do validations here.
+    for package in &root.packages {
+        let ref modules: Vec<Module> = package.modules;
+
+        for module in modules {
+            let ref functions = module.functions;
+
+            for function in functions {
+                let is_valid: bool = function.validate_case();
+
+                if !is_valid {
+                    panic!("Invalid function name");
+                }
+            }
+        }
+    }
+
+    root
+}
+
 
 fn main() {
     let toml_file_content = read_toml();
@@ -44,7 +66,9 @@ fn main() {
     // Root have packages
     // Packages have modules
     // Modules have functions
-    let root = config.root;
+    let mut root = config.root;
+
+    root = validate(root);
 
     for package in root.packages {
         create_package(&package.name);
