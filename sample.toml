@@ -11,7 +11,7 @@ name = "display"
 description = "This is the display module"
 
 [[root.packages.modules.classes]]
-name = "animal"
+name = "Animal"
 description = "This is the animal class"
 
 [[root.packages.modules.classes.methods]]

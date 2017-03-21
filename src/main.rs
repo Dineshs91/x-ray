@@ -45,14 +45,24 @@ fn validate (root: Root) -> Root {
 
         for module in modules {
             let ref functions = module.functions;
+            let ref classes = module.classes;
 
             for function in functions {
                 let is_valid: bool = function.validate_case();
 
                 if !is_valid {
-                    panic!("Invalid function name");
+                    panic!("Invalid function name format");
                 }
             }
+
+            for class in classes {
+                let is_valid: bool = class.validate_case();
+
+                if !is_valid {
+                    panic!("Invalid class name format");
+                }
+            }
+
         }
     }
 
