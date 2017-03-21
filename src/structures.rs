@@ -60,7 +60,7 @@ pub struct Class {
 impl Validate for Class {
     fn validate_case(&self) -> bool {
         // Class name will be camel case.
-        let re = Regex::new(r"^[A-Z]{0}[a-z]+$").unwrap();
+        let re = Regex::new(r"^[A-Z]{1}[a-z]+$").unwrap();
         re.is_match(&self.name)
     }
 }
