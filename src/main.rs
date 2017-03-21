@@ -3,11 +3,14 @@ extern crate serde_derive;
 extern crate serde;
 extern crate toml;
 extern crate regex;
+extern crate clap;
 
 mod template;
 mod structures;
 mod util;
+mod cli;
 
+use std::collections::BTreeMap;
 use std::io::prelude::*;
 use std::fs::File;
 
@@ -58,6 +61,10 @@ fn validate (root: Root) -> Root {
 
 
 fn main() {
+    // Call cli main function
+    let cli_config: BTreeMap<&str, bool> = cli::main();
+    let skip_validations = cli_config.get("skip_validations").unwrap();
+
     let toml_file_content = read_toml();
     let config: Config = toml::from_str(&toml_file_content).unwrap();
 
@@ -68,7 +75,9 @@ fn main() {
     // Modules have functions
     let mut root = config.root;
 
-    root = validate(root);
+    if !skip_validations {
+        root = validate(root);
+    }
 
     for package in root.packages {
         create_package(&package.name);
