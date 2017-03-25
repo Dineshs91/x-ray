@@ -1,4 +1,3 @@
-use std::collections::BTreeMap;
 use clap::{Arg, App};
 
 const ABOUT: &'static str = "
@@ -16,9 +15,7 @@ x-ray generates python code from a configuration file and vice versa.
 //   - Help
 //   - About
 
-pub fn main() -> BTreeMap<&'static str, bool> {
-    let mut cli_config = BTreeMap::new();
-
+pub fn main() -> (bool, String) {
     let app = App::new("x-ray")
         .version("0.1.0")
         .author("Dineshs91 <dineshspy07@gmail.com>")
@@ -26,7 +23,12 @@ pub fn main() -> BTreeMap<&'static str, bool> {
         .arg(Arg::with_name("skip_validations")
             .short("s")
             .long("skip-validations")
-            .help("Skip any python validations"));
+            .help("Skip any python validations"))
+        .arg(Arg::with_name("conf_file")
+            .short("f")
+            .value_name("conf_file")
+            .required(true)
+            .help("Provide the conf file"));
 
     let matches = app.get_matches();
     let mut skip_validations: bool = false;
@@ -35,7 +37,7 @@ pub fn main() -> BTreeMap<&'static str, bool> {
         skip_validations = true;
     }
 
-    cli_config.insert("skip_validations", skip_validations);
+    let conf_file = matches.value_of("conf_file").unwrap();
 
-    cli_config
+    (skip_validations, conf_file.to_string())
 }

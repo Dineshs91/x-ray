@@ -10,7 +10,6 @@ mod structures;
 mod util;
 mod cli;
 
-use std::collections::BTreeMap;
 use std::io::prelude::*;
 use std::fs::File;
 
@@ -19,8 +18,8 @@ use template::{class_template, function_template};
 use util::{write_to_file, create_package};
 
 
-fn read_toml() -> String {
-    let file = File::open("sample.toml");
+fn read_toml(conf_file: &str) -> String {
+    let file = File::open(conf_file);
 
     let mut file_content = String::new();
 
@@ -62,7 +61,6 @@ fn validate (root: Root) -> Root {
                     panic!("Invalid class name format");
                 }
             }
-
         }
     }
 
@@ -72,10 +70,11 @@ fn validate (root: Root) -> Root {
 
 fn main() {
     // Call cli main function
-    let cli_config: BTreeMap<&str, bool> = cli::main();
-    let skip_validations = cli_config.get("skip_validations").unwrap();
+    let cli_values = cli::main();
+    let skip_validations = cli_values.0;
+    let conf_file = cli_values.1;
 
-    let toml_file_content = read_toml();
+    let toml_file_content = read_toml(&conf_file);
     let config: Config = toml::from_str(&toml_file_content).unwrap();
 
     println!("{:?}", config);
