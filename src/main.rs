@@ -77,8 +77,6 @@ fn main() {
     let toml_file_content = read_toml(&conf_file);
     let config: Config = toml::from_str(&toml_file_content).unwrap();
 
-    println!("{:?}", config);
-
     // Root have packages
     // Packages have modules
     // Modules have functions
