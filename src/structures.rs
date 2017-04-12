@@ -1,6 +1,5 @@
 extern crate serde;
 
-
 use regex::Regex;
 
 #[derive(Debug)]

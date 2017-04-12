@@ -4,11 +4,14 @@ extern crate serde;
 extern crate toml;
 extern crate regex;
 extern crate clap;
+#[macro_use]
+extern crate nom;
 
 mod template;
 mod structures;
 mod util;
 mod cli;
+mod parser;
 
 use std::io::prelude::*;
 use std::fs::File;
@@ -16,6 +19,7 @@ use std::fs::File;
 use structures::{Config, Root, Module, Validate};
 use template::{class_template, function_template};
 use util::{write_to_file, create_package};
+use parser::parse;
 
 
 fn read_toml(conf_file: &str) -> String {
