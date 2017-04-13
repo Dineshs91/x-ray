@@ -75,7 +75,7 @@ fn validate (root: Root) -> Root {
 fn main() {
     let src = r#"
 class Animal:
-    def __init__(self):
+    def howdie(self):
         pass
 
 def hello():
