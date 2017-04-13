@@ -1,5 +1,5 @@
 use std;
-
+mod util;
 use nom;
 use structures::{Module, Class, Function};
 
@@ -60,7 +60,7 @@ named!(item_fn<Item>, do_parse!(
     many0!(nom::space) >>
     tag!("def") >>
     many1!(nom::space) >>
-    name: map_res!(nom::alpha, std::str::from_utf8) >>
+    name: map_res!(util::ident, std::str::from_utf8) >>
     tag!("(") >>
     params: ws!(separated_list!(tag!(","), nom::alpha)) >>
     tag!("):") >>
@@ -92,7 +92,7 @@ pub fn parse(source: String) {
 fn test_parser_class() {
     let class_content = r#"
 class Animal:
-    def init(self):
+    def __init__(self):
         pass
 "#;
 
@@ -103,7 +103,7 @@ class Animal:
     params.push("self".to_string());
 
     let method = Function {
-        name: "init".to_string(),
+        name: "__init__".to_string(),
         description: None,
         parameters: params
     };
