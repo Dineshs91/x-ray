@@ -31,7 +31,7 @@ named!(item_class<Item>, do_parse!(
     opt!(nom::newline) >>
     methods: ws!(many0!(item_fn)) >>
     (Item {
-        node: ItemKind::Class{
+        node: ItemKind::Class {
             name: name.to_string(),
             description: description,
             methods: {
@@ -175,7 +175,6 @@ fn test_parser_doc_string() {
     "#;
 
     let result = doc_string(doc_string_content.trim().as_bytes());
-
 
     assert_eq!(result.unwrap().1.trim(), "This is the description string.\n".trim());
 }
