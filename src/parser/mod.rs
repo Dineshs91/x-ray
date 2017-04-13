@@ -27,15 +27,24 @@ named!(item_class<Item>, do_parse!(
     name: map_res!(nom::alpha, std::str::from_utf8) >>
     description: opt!(doc_string) >>
     methods: many0!(item_fn) >>
-    (
-        Item {
-            node: ItemKind::Class{
-                name: name.to_string(),
-                description: description,
-                methods: Vec::new()
-            }
+    (Item {
+        node: ItemKind::Class{
+            name: name.to_string(),
+            description: description,
+            methods: methods.iter().map(move |x| {
+                match x.node {
+                    ItemKind::Function {ref name, ref description, ref parameters} => {
+                        return Function {
+                            name: "name".to_string(),
+                            description: None,
+                            parameters: Vec::new()
+                        };
+                    }
+                    _ => return Function {name: "".to_string(), description: None, parameters: Vec::new()}
+                }
+            }).collect::<Vec<_>>()
         }
-    )
+    })
 ));
 
 named!(item_fn<Item>, do_parse!(
@@ -48,15 +57,13 @@ named!(item_fn<Item>, do_parse!(
     tag!(":") >>
     opt!(nom::newline) >>
     description: opt!(doc_string) >>
-    (
-        Item {
-            node: ItemKind::Function{
-                name: name.to_string(),
-                description: description,
-                parameters: params.iter().map(|x| std::str::from_utf8(x).unwrap().to_string()).collect::<Vec<_>>()
-            }
+    (Item {
+        node: ItemKind::Function {
+            name: name.to_string(),
+            description: description,
+            parameters: params.iter().map(|x| std::str::from_utf8(x).unwrap().to_string()).collect::<Vec<_>>()
         }
-    )
+    })
 ));
 
 named!(doc_string<String>, 
