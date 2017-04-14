@@ -1,14 +1,15 @@
 use std::ops::{Range, RangeFrom, RangeTo};
+
 use nom::{Slice, Needed, InputLength, InputIter, ErrorKind, AsChar};
 use nom::IResult;
 use nom::IResult::{Done, Incomplete, Error};
 
-
-
+/// 0x5F (underscore _)
+/// Checks for valid identifier [A-Za-z_]
 fn is_ident(chr: char) -> bool
 {
     let chr: u8 = chr as u8;
-    (chr >= 0x41 && chr <= 0x5A) || (chr >= 0x61 && chr <= 0x7A) || (chr == 0x5f)
+    (chr >= 0x41 && chr <= 0x5A) || (chr >= 0x61 && chr <= 0x7A) || (chr == 0x5F)
 }
 
 pub fn ident<T>(input: T) -> IResult<T, T> where 
@@ -21,13 +22,13 @@ pub fn ident<T>(input: T) -> IResult<T, T> where
     }
 
     for (idx, item) in input.iter_indices() {
-    if !is_ident(item.as_char()) {
-        if idx == 0 {
-            return Error(error_position!(ErrorKind::Alpha, input))
-        } else {
-            return Done(input.slice(idx..), input.slice(0..idx))
+        if !is_ident(item.as_char()) {
+            if idx == 0 {
+                return Error(error_position!(ErrorKind::Alpha, input))
+            } else {
+                return Done(input.slice(idx..), input.slice(0..idx))
+            }
         }
     }
-  }
-  Done(input.slice(input_length..), input)
+    Done(input.slice(input_length..), input)
 }
