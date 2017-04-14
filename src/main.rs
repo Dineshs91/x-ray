@@ -42,7 +42,6 @@ fn read_toml(conf_file: &str) -> String {
 }
 
 fn validate (root: Root) -> Root {
-    // Do validations here.
     for package in &root.packages {
         let ref modules: Vec<Module> = package.modules;
 
@@ -71,6 +70,47 @@ fn validate (root: Root) -> Root {
     root
 }
 
+fn generate(skip_validations: bool, conf_file: String) {
+    let toml_file_content = read_toml(&conf_file);
+    let config: Config = toml::from_str(&toml_file_content).unwrap();
+
+    // Root have packages
+    // Packages have modules
+    // Modules have functions
+    let mut root = config.root;
+
+    if !skip_validations {
+        root = validate(root);
+    }
+
+    for package in root.packages {
+        create_package(&package.name);
+
+        let path = package.name;
+
+        let modules = package.modules;
+
+        for module in modules {
+            let functions = module.functions;
+            let ref filename = module.name;
+
+            let classes = module.classes;
+            let mut content = String::new();
+
+            for class in classes {
+                content += &class_template(class);
+                write_to_file(&path, &filename, &content);
+            }
+
+            for function in functions {
+                content += &function_template(function);
+            }
+
+            write_to_file(&path, &filename, &content);
+        }
+    }
+}
+
 
 fn main() {
     let src = r#"
@@ -81,48 +121,15 @@ class Animal:
 def hello():
     print "This is the hello function"
 "#;
-    parser::parse(src.to_string());
     // Call cli main function
-    // let cli_values = cli::main();
-    // let skip_validations = cli_values.0;
-    // let conf_file = cli_values.1;
+    let cli_values = cli::main();
+    let skip_validations = cli_values.skip_validations;
+    let conf_file = cli_values.conf_file.unwrap();
+    let parse = cli_values.parse;
 
-    // let toml_file_content = read_toml(&conf_file);
-    // let config: Config = toml::from_str(&toml_file_content).unwrap();
-
-    // // Root have packages
-    // // Packages have modules
-    // // Modules have functions
-    // let mut root = config.root;
-
-    // if !skip_validations {
-    //     root = validate(root);
-    // }
-
-    // for package in root.packages {
-    //     create_package(&package.name);
-
-    //     let path = package.name;
-
-    //     let modules = package.modules;
-
-    //     for module in modules {
-    //         let functions = module.functions;
-    //         let ref filename = module.name;
-
-    //         let classes = module.classes;
-    //         let mut content = String::new();
-
-    //         for class in classes {
-    //             content += &class_template(class);
-    //             write_to_file(&path, &filename, &content);
-    //         }
-
-    //         for function in functions {
-    //             content += &function_template(function);
-    //         }
-
-    //         write_to_file(&path, &filename, &content);
-    //     }
-    // }
+    if parse {
+        parser::parse(src.to_string());
+    } else {
+        generate(skip_validations, conf_file);
+    }
 }
