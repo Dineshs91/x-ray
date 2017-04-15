@@ -10,10 +10,16 @@ struct Item {
 
 #[derive(Debug, Eq, PartialEq)]
 enum ItemKind {
-    Module {name: String, description: Option<String>, functions: Vec<Function>, classes: Vec<Class>},
+    // Module {name: String, description: Option<String>, functions: Vec<Function>, classes: Vec<Class>},
     Class {name: String, description: Option<String>, methods: Vec<Function>},
     Function {name: String, description: Option<String>, parameters: Vec<String>},
 }
+
+named!(items<Vec<Item>>, many0!(alt!(
+    item_class
+    |
+    item_fn
+)));
 
 named!(item<Item>, alt!(
     item_class
@@ -56,16 +62,31 @@ named!(item_class<Item>, do_parse!(
     })
 ));
 
+// End of the function needs to be identified.
+// For this I have to check the indentation level
+// change. 
+// If the indentation moves a level to the left, then that
+// marks the end of the function/class that we are dealing
+// with.
+
+// Use take_until in nom to achieve this.
+// So the whitespaces in the beginning cannot be ignored.
 named!(item_fn<Item>, do_parse!(
-    many0!(nom::space) >>
+    len: many0!(nom::space) >>
+    // Identify the indentation at this level.
+    // End the parse if the indentation comes back to this level.
     tag!("def") >>
-    many1!(nom::space) >>
+    space: many1!(nom::space) >>
     name: map_res!(util::ident, std::str::from_utf8) >>
     tag!("(") >>
     params: ws!(separated_list!(tag!(","), nom::alpha)) >>
     tag!("):") >>
     opt!(nom::newline) >>
-    description: opt!(doc_string) >>
+    description: opt!(ws!(doc_string)) >>
+    // Take until is required to properly end this parser.
+    // use /n with spaces.
+    //cond!(len.len() == 0, nom::multispace) >>
+    ws!(tag!("pass")) >>
     (Item {
         node: ItemKind::Function {
             name: name.to_string(),
@@ -162,6 +183,50 @@ def __hello__(args):
             parameters: vec!("args".to_string())
         }
     };
+
+    assert_eq!(result.unwrap().1, expected_result);
+}
+
+#[test]
+fn test_parser_item_fn_with_multiple_functions() {
+    let fns_content = r#"
+def __hello__(args):
+    """
+    This is the hello function.
+    """
+    pass
+
+def hello(args):
+    """
+    Another hello function.
+    """
+    pass
+"#;
+
+    let result = items(fns_content.trim().as_bytes());
+
+    let mut expected_result = Vec::new();
+
+    let fn1 = Item {
+        node: ItemKind::Function {
+            name: "__hello__".to_string(),
+            description: Some("This is the hello function.\n    ".to_string()),
+            parameters: vec!("args".to_string())
+        }
+    };
+
+    let fn2 = Item {
+        node: ItemKind::Function {
+            name: "hello".to_string(),
+            description: Some("Another hello function.\n    ".to_string()),
+            parameters: vec!("args".to_string())
+        }
+    };
+
+    expected_result.push(fn1);
+    expected_result.push(fn2);
+
+    println!("Printing the result {:?}", result);
 
     assert_eq!(result.unwrap().1, expected_result);
 }

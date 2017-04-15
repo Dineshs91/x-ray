@@ -19,8 +19,6 @@ use std::fs::File;
 use structures::{Config, Root, Module, Validate};
 use template::{class_template, function_template};
 use util::{write_to_file, create_package};
-use parser::parse;
-
 
 fn read_toml(conf_file: &str) -> String {
     let file = File::open(conf_file);
