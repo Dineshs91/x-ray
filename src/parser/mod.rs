@@ -86,10 +86,13 @@ macro_rules! block (
                 res = nom::IResult::Done(input.slice(idx + 1..), input.slice(0..idx + 1));
 
                 // 2. consume everything until the indent level changes.
-                if item.as_char() == '\n' {
+                if start == false && item.as_char() == '\n' {
                     start = true;
                 } else if start == true && item.as_char() == ' ' {
                     indent += 1;
+                } else if start == true && item.as_char() == '\n' {
+                    start = true;
+                    indent = 0;
                 } else if start == true && item.as_char() != ' ' {
                     start = false;
                     if indent == cnt {
