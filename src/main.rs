@@ -109,16 +109,27 @@ fn generate(skip_validations: bool, conf_file: String) {
     }
 }
 
+fn get_py_src_content() -> String {
+    let file = File::open("sample/display.py");
+
+    let mut file_content = String::new();
+
+    let mut file = match file {
+        Ok(file) => file,
+        Err(error) => panic!("Error {}", error)
+    };
+
+    match file.read_to_string(&mut file_content) {
+        Ok(x) => println!("Read size: {}", x),
+        Err(error) => panic!("There was an error {:?} reading the config file", error),
+    }
+
+    // return the file content.
+    file_content
+}
 
 fn main() {
-    let src = r#"
-class Animal:
-    def howdie(self):
-        pass
-
-def hello():
-    print "This is the hello function"
-"#;
+    let src = get_py_src_content();
     // Call cli main function
     let cli_values = cli::main();
     let skip_validations = cli_values.skip_validations;
