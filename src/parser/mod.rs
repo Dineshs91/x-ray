@@ -24,6 +24,8 @@ named!(items<Vec<Item>>, many0!(alt!(
     item_fn
 )));
 
+//named!(items<Vec<Item>>, many0!(item_class));
+
 named!(item_class<Item>, do_parse!(
     many0!(nom::newline) >>
     tag!("class") >>
@@ -31,8 +33,7 @@ named!(item_class<Item>, do_parse!(
     name: map_res!(nom::alpha, std::str::from_utf8) >>
     tag!(":") >>
     opt!(nom::newline) >>
-    description: opt!(doc_string) >>
-    opt!(nom::newline) >>
+    description: opt!(ws!(doc_string)) >>
     methods: many0!(item_fn) >>
     (Item {
         node: ItemKind::Class {
@@ -60,6 +61,7 @@ named!(item_class<Item>, do_parse!(
     })
 ));
 
+/// TODO: Add doc here.
 macro_rules! block (
     ($i:expr, $len:expr) => (
         {
@@ -175,10 +177,19 @@ class Animal:
 fn test_parser_class_with_multiple_methods() {
     let class_content = r#"
 class Animal:
+    """
+    Animal class.
+    """
     def __init__(self):
+        """
+        Init method.
+        """
         pass
 
     def hello(args):
+        """
+        Hello method.
+        """
         pass
 "#;
 
@@ -190,19 +201,19 @@ class Animal:
 
     let method1 = Function {
         name: "__init__".to_string(),
-        description: None,
+        description: Some("Init method.\n        ".to_string()),
         parameters: params
     };
 
     let method2 = Function {
         name: "hello".to_string(),
-        description: None,
+        description: Some("Hello method.\n        ".to_string()),
         parameters: vec!["args".to_string()]
     };
 
     let item_kind = ItemKind::Class {
         name: "Animal".to_string(),
-        description: None,
+        description: Some("Animal class.\n    ".to_string()),
         methods: vec!(method1, method2)
     };
 
