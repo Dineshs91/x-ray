@@ -1,6 +1,11 @@
-use std;
 mod util;
+
+use std;
+//use std::slice::SliceConcatExt;
+
 use nom;
+use nom::IResult;
+
 use structures::{Module, Class, Function};
 
 #[derive(Debug, Eq, PartialEq)]
@@ -62,19 +67,85 @@ named!(item_class<Item>, do_parse!(
     })
 ));
 
-// End of the function needs to be identified.
-// For this I have to check the indentation level
-// change. 
-// If the indentation moves a level to the left, then that
-// marks the end of the function/class that we are dealing
-// with.
+macro_rules! block (
+    ($i:expr, $len:expr) => (
+        {
+            use nom::InputIter;
+            use nom::Slice;
+            use nom::AsChar;
+            let input = $i;
 
-// Use take_until in nom to achieve this.
-// So the whitespaces in the beginning cannot be ignored.
+            let cnt = $len as usize;
+            let mut res: nom::IResult<_,_> = nom::IResult::Incomplete(nom::Needed::Size(cnt));
+
+            // 1. Get the initial indentation level.
+            // 2. Consume everything until the indentation level drops.
+
+            // Initial variables.
+            let mut indent_level = 0;
+            let mut found_indent: bool = false;
+
+            // Variables for subsequent indent tracking.
+            let mut start = false;
+            let mut indent = 0;
+            for (idx, item) in input.iter_indices() {
+                if found_indent == false && item.as_char() == ' ' {
+                    indent_level += 1;
+                } else if item.as_char() != '\n' {
+                    found_indent = true;
+                }
+
+                res = nom::IResult::Done(input.slice(idx + 1..), input.slice(0..idx + 1));
+
+                // 2. consume everything until the indent level changes.
+                if found_indent == true {
+                    if item.as_char() == '\n' {
+                    start = true;
+                    } else if start == true && item.as_char() == ' ' {
+                        indent += 1;
+                    } else if start == true && item.as_char() != ' ' {
+                        start = false;
+                        if indent < indent_level {
+                            res = nom::IResult::Done(input.slice(idx..), input.slice(0..idx));
+                            break;
+                            // If indent > indent_level; I should recurse ??
+                        } else {
+                            indent = 0;
+                        }
+                    }
+                }
+
+            };
+            println!("{:?}", res);
+            res
+        }
+    );
+);
+
+named!(consume_block<&str>, map_res!(block!(4), std::str::from_utf8));
+
+
+#[test]
+fn test_consume_block() {
+    let content = r#"
+  def hello:
+    pass
+
+def another:
+    pass"#;
+
+    let result = consume_block(content.as_bytes());
+    let expected_result = r#"
+  def hello:
+    pass
+
+"#;
+
+    assert_eq!(result.unwrap().1, expected_result);
+}
+
 named!(item_fn<Item>, do_parse!(
-    len: many0!(nom::space) >>
-    // Identify the indentation at this level.
-    // End the parse if the indentation comes back to this level.
+    start_len: many0!(tag!(" ")) >>
     tag!("def") >>
     space: many1!(nom::space) >>
     name: map_res!(util::ident, std::str::from_utf8) >>
@@ -83,10 +154,8 @@ named!(item_fn<Item>, do_parse!(
     tag!("):") >>
     opt!(nom::newline) >>
     description: opt!(ws!(doc_string)) >>
-    // Take until is required to properly end this parser.
-    // use /n with spaces.
-    //cond!(len.len() == 0, nom::multispace) >>
-    ws!(tag!("pass")) >>
+    block!(start_len.len()) >>
+
     (Item {
         node: ItemKind::Function {
             name: name.to_string(),
@@ -96,7 +165,7 @@ named!(item_fn<Item>, do_parse!(
     })
 ));
 
-named!(doc_string<String>, 
+named!(doc_string<String>,
     do_parse!(
         doc_string: map_res!(ws!(delimited!(tag!("\"\"\""), is_not!("\"\"\""), tag!("\"\"\""))), std::str::from_utf8) >>
         (doc_string.to_string())
@@ -194,13 +263,13 @@ def __hello__(args):
     """
     This is the hello function.
     """
-    pass
+    print "Hello"
 
 def hello(args):
     """
     Another hello function.
     """
-    pass
+    print "Hello"
 "#;
 
     let result = items(fns_content.trim().as_bytes());
