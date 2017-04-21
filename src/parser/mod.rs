@@ -25,6 +25,7 @@ named!(items<Vec<Item>>, many0!(alt!(
 )));
 
 named!(item_class<Item>, do_parse!(
+    many0!(nom::newline) >>
     tag!("class") >>
     many1!(nom::space) >>
     name: map_res!(nom::alpha, std::str::from_utf8) >>
@@ -32,7 +33,7 @@ named!(item_class<Item>, do_parse!(
     opt!(nom::newline) >>
     description: opt!(doc_string) >>
     opt!(nom::newline) >>
-    methods: ws!(many0!(item_fn)) >>
+    methods: many0!(item_fn) >>
     (Item {
         node: ItemKind::Class {
             name: name.to_string(),
@@ -171,6 +172,47 @@ class Animal:
 }
 
 #[test]
+fn test_parser_class_with_multiple_methods() {
+    let class_content = r#"
+class Animal:
+    def __init__(self):
+        pass
+
+    def hello(args):
+        pass
+"#;
+
+    let result = item_class(class_content.as_bytes());
+
+    let mut params: Vec<String> = Vec::new();
+
+    params.push("self".to_string());
+
+    let method1 = Function {
+        name: "__init__".to_string(),
+        description: None,
+        parameters: params
+    };
+
+    let method2 = Function {
+        name: "hello".to_string(),
+        description: None,
+        parameters: vec!["args".to_string()]
+    };
+
+    let item_kind = ItemKind::Class {
+        name: "Animal".to_string(),
+        description: None,
+        methods: vec!(method1, method2)
+    };
+
+    let expected_result = Item {
+        node: item_kind
+    };
+    assert_eq!(result.unwrap().1, expected_result);
+}
+
+#[test]
 fn test_parser_item_fn() {
     let fn_content = r#"
 def hello(args):
@@ -254,8 +296,6 @@ def hello(args):
 
     expected_result.push(fn1);
     expected_result.push(fn2);
-
-    println!("Printing the result {:?}", result);
 
     assert_eq!(result.unwrap().1, expected_result);
 }
