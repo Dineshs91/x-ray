@@ -24,12 +24,6 @@ named!(items<Vec<Item>>, many0!(alt!(
     item_fn
 )));
 
-named!(item<Item>, alt!(
-    item_class
-    |
-    item_fn
-));
-
 named!(item_class<Item>, do_parse!(
     tag!("class") >>
     many1!(nom::space) >>
@@ -139,7 +133,7 @@ named!(doc_string<String>,
 );
 
 pub fn parse(source: String) {
-    let result = item(source.trim().as_bytes());
+    let result = items(source.trim().as_bytes());
 
     println!("The result is {:?}", result);
 }
