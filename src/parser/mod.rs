@@ -93,7 +93,7 @@ macro_rules! block (
                     if indent == cnt {
                         res = nom::IResult::Done(input.slice(idx..), input.slice(0..idx));
                         break;
-                        // If indent > indent_level; I should recurse ??
+                        // If indent > cnt; I should recurse ??
                     } else {
                         indent = 0;
                     }
