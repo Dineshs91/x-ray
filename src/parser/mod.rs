@@ -98,7 +98,7 @@ macro_rules! block (
                     }
                 }
             };
-            println!("{:?}", res);
+
             res
         }
     );
