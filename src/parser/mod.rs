@@ -1,10 +1,8 @@
 mod util;
 
 use std;
-//use std::slice::SliceConcatExt;
 
 use nom;
-use nom::IResult;
 
 use structures::{Module, Class, Function};
 
@@ -81,68 +79,33 @@ macro_rules! block (
             // 1. Get the initial indentation level.
             // 2. Consume everything until the indentation level drops.
 
-            // Initial variables.
-            let mut indent_level = 0;
-            let mut found_indent: bool = false;
-
             // Variables for subsequent indent tracking.
             let mut start = false;
             let mut indent = 0;
             for (idx, item) in input.iter_indices() {
-                if found_indent == false && item.as_char() == ' ' {
-                    indent_level += 1;
-                } else if item.as_char() != '\n' {
-                    found_indent = true;
-                }
-
                 res = nom::IResult::Done(input.slice(idx + 1..), input.slice(0..idx + 1));
 
                 // 2. consume everything until the indent level changes.
-                if found_indent == true {
-                    if item.as_char() == '\n' {
+                if item.as_char() == '\n' {
                     start = true;
-                    } else if start == true && item.as_char() == ' ' {
-                        indent += 1;
-                    } else if start == true && item.as_char() != ' ' {
-                        start = false;
-                        if indent < indent_level {
-                            res = nom::IResult::Done(input.slice(idx..), input.slice(0..idx));
-                            break;
-                            // If indent > indent_level; I should recurse ??
-                        } else {
-                            indent = 0;
-                        }
+                } else if start == true && item.as_char() == ' ' {
+                    indent += 1;
+                } else if start == true && item.as_char() != ' ' {
+                    start = false;
+                    if indent == cnt {
+                        res = nom::IResult::Done(input.slice(idx..), input.slice(0..idx));
+                        break;
+                        // If indent > indent_level; I should recurse ??
+                    } else {
+                        indent = 0;
                     }
                 }
-
             };
             println!("{:?}", res);
             res
         }
     );
 );
-
-named!(consume_block<&str>, map_res!(block!(4), std::str::from_utf8));
-
-
-#[test]
-fn test_consume_block() {
-    let content = r#"
-  def hello:
-    pass
-
-def another:
-    pass"#;
-
-    let result = consume_block(content.as_bytes());
-    let expected_result = r#"
-  def hello:
-    pass
-
-"#;
-
-    assert_eq!(result.unwrap().1, expected_result);
-}
 
 named!(item_fn<Item>, do_parse!(
     start_len: many0!(tag!(" ")) >>
