@@ -33,7 +33,7 @@ named!(item_class<Item>, do_parse!(
     name: map_res!(nom::alpha, std::str::from_utf8) >>
     tag!(":") >>
     opt!(nom::newline) >>
-    description: opt!(ws!(doc_string)) >>
+    description: opt!(doc_string) >>
     methods: many0!(item_fn) >>
     (Item {
         node: ItemKind::Class {
@@ -108,6 +108,7 @@ macro_rules! block (
 );
 
 named!(item_fn<Item>, do_parse!(
+    many0!(nom::newline) >>
     start_len: many0!(tag!(" ")) >>
     tag!("def") >>
     space: many1!(nom::space) >>
@@ -116,7 +117,7 @@ named!(item_fn<Item>, do_parse!(
     params: ws!(separated_list!(tag!(","), nom::alpha)) >>
     tag!("):") >>
     opt!(nom::newline) >>
-    description: opt!(ws!(doc_string)) >>
+    description: opt!(doc_string) >>
     block!(start_len.len()) >>
 
     (Item {
@@ -130,7 +131,8 @@ named!(item_fn<Item>, do_parse!(
 
 named!(doc_string<String>,
     do_parse!(
-        doc_string: map_res!(ws!(delimited!(tag!("\"\"\""), is_not!("\"\"\""), tag!("\"\"\""))), std::str::from_utf8) >>
+        opt!(nom::multispace) >>
+        doc_string: map_res!(delimited!(tag!("\"\"\""), is_not!("\"\"\""), tag!("\"\"\"")), std::str::from_utf8) >>
         (doc_string.to_string())
     )
 );
@@ -201,19 +203,19 @@ class Animal:
 
     let method1 = Function {
         name: "__init__".to_string(),
-        description: Some("Init method.\n        ".to_string()),
+        description: Some("\n        Init method.\n        ".to_string()),
         parameters: params
     };
 
     let method2 = Function {
         name: "hello".to_string(),
-        description: Some("Hello method.\n        ".to_string()),
+        description: Some("\n        Hello method.\n        ".to_string()),
         parameters: vec!["args".to_string()]
     };
 
     let item_kind = ItemKind::Class {
         name: "Animal".to_string(),
-        description: Some("Animal class.\n    ".to_string()),
+        description: Some("\n    Animal class.\n    ".to_string()),
         methods: vec!(method1, method2)
     };
 
@@ -238,7 +240,7 @@ def hello(args):
     let expected_result = Item {
         node: ItemKind::Function {
             name: "hello".to_string(),
-            description: Some("This is the hello function.\n    ".to_string()),
+            description: Some("\n    This is the hello function.\n    ".to_string()),
             parameters: vec!("args".to_string())
         }
     };
@@ -261,7 +263,7 @@ def __hello__(args):
     let expected_result = Item {
         node: ItemKind::Function {
             name: "__hello__".to_string(),
-            description: Some("This is the hello function.\n    ".to_string()),
+            description: Some("\n    This is the hello function.\n    ".to_string()),
             parameters: vec!("args".to_string())
         }
     };
@@ -292,7 +294,7 @@ def hello(args):
     let fn1 = Item {
         node: ItemKind::Function {
             name: "__hello__".to_string(),
-            description: Some("This is the hello function.\n    ".to_string()),
+            description: Some("\n    This is the hello function.\n    ".to_string()),
             parameters: vec!("args".to_string())
         }
     };
@@ -300,7 +302,7 @@ def hello(args):
     let fn2 = Item {
         node: ItemKind::Function {
             name: "hello".to_string(),
-            description: Some("Another hello function.\n    ".to_string()),
+            description: Some("\n    Another hello function.\n    ".to_string()),
             parameters: vec!("args".to_string())
         }
     };
