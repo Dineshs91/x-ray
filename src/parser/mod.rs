@@ -26,6 +26,76 @@ named!(items<Vec<Item>>, many0!(alt!(
 
 //named!(items<Vec<Item>>, many0!(item_class));
 
+macro_rules! many0_block(
+  ($i:expr, $len:expr, $submac:ident!( $($args:tt)* )) => (
+    {
+      use nom::InputLength;
+      use nom::InputIter;
+      use nom::AsChar;
+
+      let ret;
+      let mut res   = ::std::vec::Vec::new();
+      let mut input = $i;
+
+      loop {
+        if input.input_len() == 0 {
+          ret = nom::IResult::Done(input, res);
+          break;
+        }
+
+        let cnt = $len as usize;
+        let mut indent = 0;
+
+        for (idx, item) in input.iter_indices() {
+            if item.as_char() == '\n' || item.as_char() == ' ' {
+                if item.as_char() == ' ' {
+                    indent += 1;
+                }
+            } else {
+                break;
+            }
+        };
+
+        if indent <= cnt {
+            ret = nom::IResult::Done(input, res);
+            break;
+        }
+
+        match $submac!(input, $($args)*) {
+          nom::IResult::Error(_)                            => {
+            ret = nom::IResult::Done(input, res);
+            break;
+          },
+          nom::IResult::Incomplete(nom::Needed::Unknown) => {
+            ret = nom::IResult::Incomplete(nom::Needed::Unknown);
+            break;
+          },
+          nom::IResult::Incomplete(nom::Needed::Size(i)) => {
+            let size = i + ($i).input_len() - input.input_len();
+            ret = nom::IResult::Incomplete(nom::Needed::Size(size));
+            break;
+          },
+          nom::IResult::Done(i, o)                          => {
+            // loop trip must always consume (otherwise infinite loops)
+            if i == input {
+              ret = nom::IResult::Error(error_position!(nom::ErrorKind::Many0,input));
+              break;
+            }
+
+            res.push(o);
+            input = i;
+          }
+        }
+      }
+
+      ret
+    }
+  );
+  ($i:expr, $len:expr , $f:expr) => (
+    many0_block!($i, $len, call!($f));
+  );
+);
+
 named!(item_class<Item>, do_parse!(
     many0!(nom::newline) >>
     start_len: many0!(tag!(" ")) >>
@@ -35,7 +105,7 @@ named!(item_class<Item>, do_parse!(
     tag!(":") >>
     opt!(nom::newline) >>
     description: opt!(doc_string) >>
-    methods: many0!(item_fn) >>
+    methods: many0_block!(start_len.len(), item_fn) >>
     (Item {
         node: ItemKind::Class {
             name: name.to_string(),
