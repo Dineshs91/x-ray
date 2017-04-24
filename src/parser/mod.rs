@@ -28,6 +28,7 @@ named!(items<Vec<Item>>, many0!(alt!(
 
 named!(item_class<Item>, do_parse!(
     many0!(nom::newline) >>
+    start_len: many0!(tag!(" ")) >>
     tag!("class") >>
     many1!(nom::space) >>
     name: map_res!(nom::alpha, std::str::from_utf8) >>
@@ -73,29 +74,23 @@ macro_rules! block (
             let cnt = $len as usize;
             let mut res: nom::IResult<_,_> = nom::IResult::Incomplete(nom::Needed::Size(cnt));
 
-            // 1. Get the initial indentation level.
-            // 2. Consume everything until the indentation level drops.
-
-            // Variables for subsequent indent tracking.
             let mut start = false;
             let mut indent = 0;
             for (idx, item) in input.iter_indices() {
                 res = nom::IResult::Done(input.slice(idx + 1..), input.slice(0..idx + 1));
 
-                // 2. consume everything until the indent level changes.
+                // consume everything until the indent level changes.
                 if start == false && item.as_char() == '\n' {
                     start = true;
                 } else if start == true && item.as_char() == ' ' {
                     indent += 1;
                 } else if start == true && item.as_char() == '\n' {
-                    start = true;
                     indent = 0;
                 } else if start == true && item.as_char() != ' ' {
                     start = false;
-                    if indent == cnt {
-                        res = nom::IResult::Done(input.slice(idx..), input.slice(0..idx));
+                    if indent <= cnt {
+                        res = nom::IResult::Done(input.slice(idx - indent..), input.slice(0..idx - indent));
                         break;
-                        // If indent > cnt; I should recurse ??
                     } else {
                         indent = 0;
                     }
