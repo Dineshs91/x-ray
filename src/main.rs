@@ -128,16 +128,25 @@ fn get_py_src_content() -> String {
     file_content
 }
 
-fn main() {
+fn parse(parse_dir: String) {
     let src = get_py_src_content();
-    // Call cli main function
+    parser::parse(src.to_string());
+
+    // Start from a directory. Can add file support later.
+    // Parse all 
+    //   1. Individual modules.
+    //   2. Packages. -> Modules.
+}
+
+fn main() {
     let cli_values = cli::main();
     let skip_validations = cli_values.skip_validations;
     let conf_file = cli_values.conf_file.unwrap();
-    let parse = cli_values.parse;
+    let parse_opt = cli_values.parse;
+    let parse_dir = cli_values.parse_dir;
 
-    if parse {
-        parser::parse(src.to_string());
+    if parse_opt {
+        parse(parse_dir.unwrap());
     } else {
         generate(skip_validations, conf_file);
     }
