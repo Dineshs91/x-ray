@@ -15,8 +15,8 @@ struct Item {
 
 #[derive(Debug, Eq, PartialEq)]
 enum ItemKind {
-    // Module {name: String, description: Option<String>, functions: Vec<Function>, classes: Vec<Class>},
     Import {path: String},
+    ImportFrom {module: String, name: String, level: i32},
     Shebang {path: String},
     Class {name: String, description: Option<String>, methods: Vec<Function>},
     Function {name: String, description: Option<String>, parameters: Vec<String>}
@@ -26,6 +26,8 @@ named!(items<Vec<Item>>, many0!(alt!(
     shebang
     |
     item_import
+    |
+    item_import_from
     |
     item_class
     |
@@ -52,6 +54,52 @@ named!(item_import<Item>, do_parse!(
     (Item {
         node: ItemKind::Import {
             path: path.to_string()
+        }
+    })
+));
+
+named!(item_import_from<Item>, do_parse!(
+    many0!(nom::newline) >>
+    tag!("from") >>
+    many1!(nom::space) >>
+    module: map_res!(take_until_and_consume!(" import"), std::str::from_utf8) >>
+    many1!(nom::space) >>
+    name: map_res!(take_until_and_consume!("\n"), std::str::from_utf8) >>
+    (Item {
+        node: ItemKind::ImportFrom {
+            module: {
+                // Just strip the initial dots in the module.
+                let mut module_vec = Vec::new();
+                let mut init = false;
+                for ch in module.chars() {
+                    if init == false && ch == '.' {
+                        continue
+                    } else {
+                        init = true;
+                        module_vec.push(ch);
+                    }
+                }
+                let module_str: String = module_vec.into_iter().collect();
+                module_str
+            },
+            name: name.to_string(),
+            level: {
+                let mut level;
+                if module.starts_with(".") {
+                    level = 0;
+                    for ch in module.chars() {
+                        if ch == '.' {
+                            level += 1;
+                        } else {
+                            break;
+                        }
+                    }
+                } else {
+                    level = 0;
+                }
+
+                level
+            }
         }
     })
 ));
@@ -168,7 +216,69 @@ import os
 
     let expected_result = import_os;
 
-    println!("Actual result is {:?}", actual_result);
+    assert_eq!(actual_result.unwrap().1, expected_result);
+}
+
+#[test]
+fn test_parser_import_from_absolute() {
+    let content = r#"
+from os import stat
+
+"#;
+    let actual_result = item_import_from(content.as_bytes());
+
+    let import_os = Item {
+        node: ItemKind::ImportFrom {
+            module: "os".to_string(),
+            name: "stat".to_string(),
+            level: 0
+        }
+    };
+
+    let expected_result = import_os;
+
+    assert_eq!(actual_result.unwrap().1, expected_result);
+}
+
+#[test]
+fn test_parser_import_from_relative_level_1() {
+    let content = r#"
+from .os import stat
+
+"#;
+    let actual_result = item_import_from(content.as_bytes());
+
+    let import_os = Item {
+        node: ItemKind::ImportFrom {
+            module: "os".to_string(),
+            name: "stat".to_string(),
+            level: 1
+        }
+    };
+
+    let expected_result = import_os;
+
+    assert_eq!(actual_result.unwrap().1, expected_result);
+}
+
+#[test]
+fn test_parser_import_from_relative_level_2() {
+    let content = r#"
+from ..os.stat import __init__
+
+"#;
+    let actual_result = item_import_from(content.as_bytes());
+
+    let import_os = Item {
+        node: ItemKind::ImportFrom {
+            module: "os.stat".to_string(),
+            name: "__init__".to_string(),
+            level: 2
+        }
+    };
+
+    let expected_result = import_os;
+
     assert_eq!(actual_result.unwrap().1, expected_result);
 }
 
