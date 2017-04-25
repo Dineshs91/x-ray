@@ -88,7 +88,7 @@ named!(doc_string<String>,
     do_parse!(
         opt!(nom::multispace) >>
         doc_string: map_res!(delimited!(tag!("\"\"\""), is_not!("\"\"\""), tag!("\"\"\"")), std::str::from_utf8) >>
-        (doc_string.to_string())
+        (doc_string.trim().to_string())
     )
 );
 
@@ -158,19 +158,19 @@ class Animal:
 
     let method1 = Function {
         name: "__init__".to_string(),
-        description: Some("\n        Init method.\n        ".to_string()),
+        description: Some("Init method.".to_string()),
         parameters: params
     };
 
     let method2 = Function {
         name: "hello".to_string(),
-        description: Some("\n        Hello method.\n        ".to_string()),
+        description: Some("Hello method.".to_string()),
         parameters: vec!["args".to_string()]
     };
 
     let item_kind = ItemKind::Class {
         name: "Animal".to_string(),
-        description: Some("\n    Animal class.\n    ".to_string()),
+        description: Some("Animal class.".to_string()),
         methods: vec!(method1, method2)
     };
 
@@ -195,7 +195,7 @@ def hello(args):
     let expected_result = Item {
         node: ItemKind::Function {
             name: "hello".to_string(),
-            description: Some("\n    This is the hello function.\n    ".to_string()),
+            description: Some("This is the hello function.".to_string()),
             parameters: vec!("args".to_string())
         }
     };
@@ -218,7 +218,7 @@ def __hello__(args):
     let expected_result = Item {
         node: ItemKind::Function {
             name: "__hello__".to_string(),
-            description: Some("\n    This is the hello function.\n    ".to_string()),
+            description: Some("This is the hello function.".to_string()),
             parameters: vec!("args".to_string())
         }
     };
@@ -249,7 +249,7 @@ def hello(args):
     let fn1 = Item {
         node: ItemKind::Function {
             name: "__hello__".to_string(),
-            description: Some("\n    This is the hello function.\n    ".to_string()),
+            description: Some("This is the hello function.".to_string()),
             parameters: vec!("args".to_string())
         }
     };
@@ -257,7 +257,7 @@ def hello(args):
     let fn2 = Item {
         node: ItemKind::Function {
             name: "hello".to_string(),
-            description: Some("\n    Another hello function.\n    ".to_string()),
+            description: Some("Another hello function.".to_string()),
             parameters: vec!("args".to_string())
         }
     };
@@ -296,20 +296,20 @@ def display(msg):
 "#;
     let init_method = Function {
         name: "__init__".to_string(),
-        description: Some("\n        Init method.\n        ".to_string()),
+        description: Some("Init method.".to_string()),
         parameters: vec!["self".to_string()]
     };
 
     let get_animal_method = Function {
         name: "get_animal".to_string(),
-        description: Some("\n        Get the animal instance of this object.\n        ".to_string()),
+        description: Some("Get the animal instance of this object.".to_string()),
         parameters: vec!["self".to_string()]
     };
 
     let class_item = Item {
         node: ItemKind::Class {
             name: "Animal".to_string(),
-            description: Some("\n    This is the animal class.\n    ".to_string()),
+            description: Some("This is the animal class.".to_string()),
             methods: vec!(init_method, get_animal_method)
         }
     };
@@ -319,7 +319,7 @@ def display(msg):
     let function_item = Item {
         node: ItemKind::Function {
             name: "display".to_string(),
-            description: Some("\n    This is the display function.\n    ".to_string()),
+            description: Some("This is the display function.".to_string()),
             parameters: vec!["msg".to_string()]
         }
     };
@@ -339,5 +339,5 @@ fn test_parser_doc_string() {
 
     let result = doc_string(doc_string_content.trim().as_bytes());
 
-    assert_eq!(result.unwrap().1.trim(), "This is the description string.\n".trim());
+    assert_eq!(result.unwrap().1.trim(), "This is the description string.");
 }
