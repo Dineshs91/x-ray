@@ -281,6 +281,7 @@ class Animal:
         """
         for i in range(0, 12):
             print i
+        pass
 
     def get_animal(self):
         """
