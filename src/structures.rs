@@ -1,17 +1,14 @@
 extern crate serde;
 
-
 use regex::Regex;
 
-#[derive(Debug)]
-#[derive(Deserialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize)]
 pub struct Config {
 	pub root: Root,
 }
 
 // project root
-#[derive(Debug)]
-#[derive(Deserialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize)]
 pub struct Root {
 	pub name: String,
 	pub description: Option<String>,
@@ -24,8 +21,7 @@ pub struct Root {
 }
 
 // python package. Any directory which has a __init__.py file.
-#[derive(Debug)]
-#[derive(Deserialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize)]
 pub struct Package {
 	pub name: String,
 
@@ -34,8 +30,7 @@ pub struct Package {
 }
 
 // python module, any python file.
-#[derive(Debug)]
-#[derive(Deserialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize)]
 pub struct Module {
 	pub name: String,
     pub description: Option<String>,
@@ -47,8 +42,7 @@ pub struct Module {
 	pub classes: Vec<Class>,
 }
 
-#[derive(Debug)]
-#[derive(Deserialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize)]
 pub struct Class {
 	pub name: String,
 	pub description: Option<String>,
@@ -66,8 +60,7 @@ impl Validate for Class {
 }
 
 // structure for a forming python function.
-#[derive(Debug)]
-#[derive(Deserialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize)]
 pub struct Function {
     pub name: String,
     pub description: Option<String>,

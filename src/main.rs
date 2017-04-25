@@ -4,11 +4,14 @@ extern crate serde;
 extern crate toml;
 extern crate regex;
 extern crate clap;
+#[macro_use]
+extern crate nom;
 
 mod template;
 mod structures;
 mod util;
 mod cli;
+mod parser;
 
 use std::io::prelude::*;
 use std::fs::File;
@@ -16,7 +19,6 @@ use std::fs::File;
 use structures::{Config, Root, Module, Validate};
 use template::{class_template, function_template};
 use util::{write_to_file, create_package};
-
 
 fn read_toml(conf_file: &str) -> String {
     let file = File::open(conf_file);
@@ -30,7 +32,7 @@ fn read_toml(conf_file: &str) -> String {
 
     match file.read_to_string(&mut file_content) {
         Ok(x) => println!("Read size: {}", x),
-        Err(error) => panic!("There was an error {:?}", error),
+        Err(error) => panic!("There was an error {:?} reading the config file", error),
     }
 
     // return the file content.
@@ -38,7 +40,6 @@ fn read_toml(conf_file: &str) -> String {
 }
 
 fn validate (root: Root) -> Root {
-    // Do validations here.
     for package in &root.packages {
         let ref modules: Vec<Module> = package.modules;
 
@@ -67,17 +68,9 @@ fn validate (root: Root) -> Root {
     root
 }
 
-
-fn main() {
-    // Call cli main function
-    let cli_values = cli::main();
-    let skip_validations = cli_values.0;
-    let conf_file = cli_values.1;
-
+fn generate(skip_validations: bool, conf_file: String) {
     let toml_file_content = read_toml(&conf_file);
     let config: Config = toml::from_str(&toml_file_content).unwrap();
-
-    println!("{:?}", config);
 
     // Root have packages
     // Packages have modules
@@ -113,5 +106,39 @@ fn main() {
 
             write_to_file(&path, &filename, &content);
         }
+    }
+}
+
+fn get_py_src_content() -> String {
+    let file = File::open("sample/display.py");
+
+    let mut file_content = String::new();
+
+    let mut file = match file {
+        Ok(file) => file,
+        Err(error) => panic!("Error {}", error)
+    };
+
+    match file.read_to_string(&mut file_content) {
+        Ok(x) => println!("Read size: {}", x),
+        Err(error) => panic!("There was an error {:?} reading the config file", error),
+    }
+
+    // return the file content.
+    file_content
+}
+
+fn main() {
+    let src = get_py_src_content();
+    // Call cli main function
+    let cli_values = cli::main();
+    let skip_validations = cli_values.skip_validations;
+    let conf_file = cli_values.conf_file.unwrap();
+    let parse = cli_values.parse;
+
+    if parse {
+        parser::parse(src.to_string());
+    } else {
+        generate(skip_validations, conf_file);
     }
 }
