@@ -379,6 +379,67 @@ def hello(args):
 }
 
 #[test]
+fn test_parser_items_with_class_and_function() {
+    let content = r#"
+class Animal:
+    """
+    This is the animal class.
+    """
+    def __init__(self):
+        """
+        Init method.
+        """
+        for i in range(0, 12):
+            print i
+
+    def get_animal(self):
+        """
+        Get the animal instance of this object.
+        """
+        pass
+
+def display(msg):
+    """
+    This is the display function.
+    """
+    pass
+"#;
+    let init_method = Function {
+        name: "__init__".to_string(),
+        description: Some("\n        Init method.\n        ".to_string()),
+        parameters: vec!["self".to_string()]
+    };
+
+    let get_animal_method = Function {
+        name: "get_animal".to_string(),
+        description: Some("\n        Get the animal instance of this object.\n        ".to_string()),
+        parameters: vec!["self".to_string()]
+    };
+
+    let class_item = Item {
+        node: ItemKind::Class {
+            name: "Animal".to_string(),
+            description: Some("\n    This is the animal class.\n    ".to_string()),
+            methods: vec!(init_method, get_animal_method)
+        }
+    };
+    let mut expected_result = Vec::new();
+    expected_result.push(class_item);
+
+    let function_item = Item {
+        node: ItemKind::Function {
+            name: "display".to_string(),
+            description: Some("\n    This is the display function.\n    ".to_string()),
+            parameters: vec!["msg".to_string()]
+        }
+    };
+    expected_result.push(function_item);
+
+    let actual_result = items(content.trim().as_bytes());
+    assert_eq!(actual_result.unwrap().1, expected_result);
+}
+
+#[test]
 fn test_parser_doc_string() {
     let doc_string_content = r#"
     """
