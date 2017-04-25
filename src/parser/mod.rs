@@ -18,13 +18,28 @@ enum ItemKind {
     // Module {name: String, description: Option<String>, functions: Vec<Function>, classes: Vec<Class>},
     Class {name: String, description: Option<String>, methods: Vec<Function>},
     Function {name: String, description: Option<String>, parameters: Vec<String>},
+    Import {path: String}
 }
 
 named!(items<Vec<Item>>, many0!(alt!(
+    item_import
+    |
     item_class
     |
     item_fn
 )));
+
+named!(item_import<Item>, do_parse!(
+    many0!(nom::newline) >>
+    tag!("import") >>
+    many1!(nom::space) >>
+    path: map_res!(take_until_and_consume!("\n"), std::str::from_utf8) >>
+    (Item {
+        node: ItemKind::Import {
+            path: path.to_string()
+        }
+    })
+));
 
 named!(item_class<Item>, do_parse!(
     many0!(nom::newline) >>
@@ -96,6 +111,67 @@ pub fn parse(source: String) {
     let result = items(source.as_bytes());
 
     println!("The result is {:?}", result);
+}
+
+#[test]
+fn test_parser_import() {
+    let content = r#"
+import os
+
+"#;
+    let actual_result = item_import(content.as_bytes());
+
+    let import_os = Item {
+        node: ItemKind::Import {
+            path: "os".to_string()
+        }
+    };
+
+    let expected_result = import_os;
+
+    println!("Actual result is {:?}", actual_result);
+    assert_eq!(actual_result.unwrap().1, expected_result);
+}
+
+#[test]
+fn test_parser_multiple_imports_and_function() {
+    let content = r#"
+import os
+import imap
+
+
+def hello():
+    """
+    Hello function.
+    """
+    pass
+"#;
+    let actual_result = items(content.as_bytes());
+
+    let import_os = Item {
+        node: ItemKind::Import {
+            path: "os".to_string()
+        }
+    };
+
+    let import_imap = Item {
+        node: ItemKind::Import {
+            path: "imap".to_string()
+        }
+    };
+
+    let hello_function = Item {
+        node: ItemKind::Function {
+            name: "hello".to_string(),
+            description: Some("Hello function.".to_string()),
+            parameters: Vec::new()
+        }
+    };
+
+    let expected_result = vec!(import_os, import_imap, hello_function);
+
+    println!("Actual result is {:?}", actual_result);
+    assert_eq!(actual_result.unwrap().1, expected_result);
 }
 
 #[test]
