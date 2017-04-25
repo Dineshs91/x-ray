@@ -85,6 +85,7 @@ named!(item_import_from<Item>, do_parse!(
             name: name.to_string(),
             level: {
                 let mut level;
+                // Level: 0 is absolute import
                 if module.starts_with(".") {
                     level = 0;
                     for ch in module.chars() {
