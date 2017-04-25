@@ -16,18 +16,33 @@ struct Item {
 #[derive(Debug, Eq, PartialEq)]
 enum ItemKind {
     // Module {name: String, description: Option<String>, functions: Vec<Function>, classes: Vec<Class>},
+    Import {path: String},
+    Shebang {path: String},
     Class {name: String, description: Option<String>, methods: Vec<Function>},
-    Function {name: String, description: Option<String>, parameters: Vec<String>},
-    Import {path: String}
+    Function {name: String, description: Option<String>, parameters: Vec<String>}
 }
 
 named!(items<Vec<Item>>, many0!(alt!(
+    shebang
+    |
     item_import
     |
     item_class
     |
     item_fn
 )));
+
+named!(shebang<Item>, do_parse!(
+    many0!(nom::newline) >>
+    tag!("#!") >>
+    many1!(nom::space) >>
+    path: map_res!(take_until_and_consume!("\n"), std::str::from_utf8) >>
+    (Item {
+        node: ItemKind::Shebang {
+            path: path.to_string()
+        }
+    })
+));
 
 named!(item_import<Item>, do_parse!(
     many0!(nom::newline) >>
@@ -119,6 +134,22 @@ pub fn parse(source: String) {
     let result = items(source.as_bytes());
 
     println!("The result is {:?}", result);
+}
+
+#[test]
+fn test_parser_shebang() {
+    let content = r#"
+#! /usr/bin/env python
+"#;
+
+    let actual_result = shebang(content.as_bytes());
+    let expected_result = Item {
+        node: ItemKind::Shebang {
+            path: "/usr/bin/env python".to_string()
+        }
+    };
+
+    assert_eq!(actual_result.unwrap().1, expected_result);
 }
 
 #[test]
