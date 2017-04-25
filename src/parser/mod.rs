@@ -41,12 +41,20 @@ named!(item_import<Item>, do_parse!(
     })
 ));
 
+named!(parent<String>, do_parse!(
+    tag!("(") >>
+    parent: map_res!(take_until!(")"), std::str::from_utf8) >>
+    tag!(")") >>
+    (parent.to_string())
+));
+
 named!(item_class<Item>, do_parse!(
     many0!(nom::newline) >>
     start_len: many0!(tag!(" ")) >>
     tag!("class") >>
     many1!(nom::space) >>
     name: map_res!(nom::alpha, std::str::from_utf8) >>
+    opt!(parent) >>
     tag!(":") >>
     opt!(nom::newline) >>
     description: opt!(doc_string) >>
