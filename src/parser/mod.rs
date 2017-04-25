@@ -93,7 +93,7 @@ named!(doc_string<String>,
 );
 
 pub fn parse(source: String) {
-    let result = items(source.trim().as_bytes());
+    let result = items(source.as_bytes());
 
     println!("The result is {:?}", result);
 }
@@ -106,7 +106,7 @@ class Animal:
         pass
 "#;
 
-    let result = item_class(class_content.trim().as_bytes());
+    let result = item_class(class_content.as_bytes());
 
     let mut params: Vec<String> = Vec::new();
 
@@ -190,7 +190,7 @@ def hello(args):
     pass
 "#;
 
-    let result = item_fn(fn_content.trim().as_bytes());
+    let result = item_fn(fn_content.as_bytes());
 
     let expected_result = Item {
         node: ItemKind::Function {
@@ -213,7 +213,7 @@ def __hello__(args):
     pass
 "#;
 
-    let result = item_fn(fn_content.trim().as_bytes());
+    let result = item_fn(fn_content.as_bytes());
 
     let expected_result = Item {
         node: ItemKind::Function {
@@ -242,7 +242,7 @@ def hello(args):
     print "Hello"
 "#;
 
-    let result = items(fns_content.trim().as_bytes());
+    let result = items(fns_content.as_bytes());
 
     let mut expected_result = Vec::new();
 
@@ -325,7 +325,7 @@ def display(msg):
     };
     expected_result.push(function_item);
 
-    let actual_result = items(content.trim().as_bytes());
+    let actual_result = items(content.as_bytes());
     assert_eq!(actual_result.unwrap().1, expected_result);
 }
 
@@ -337,7 +337,7 @@ fn test_parser_doc_string() {
     """
     "#;
 
-    let result = doc_string(doc_string_content.trim().as_bytes());
+    let result = doc_string(doc_string_content.as_bytes());
 
-    assert_eq!(result.unwrap().1.trim(), "This is the description string.");
+    assert_eq!(result.unwrap().1, "This is the description string.");
 }
