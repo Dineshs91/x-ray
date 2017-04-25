@@ -1,4 +1,6 @@
-/// TODO: Add doc here.
+/// parse and consume a code block.
+/// A code block is identified by the len(Indentation start) and ends
+/// when indentation drops down.
 #[macro_export]
 macro_rules! block (
     ($i:expr, $len:expr) => (
@@ -39,6 +41,8 @@ macro_rules! block (
     );
 );
 
+/// many0_block is same as many0, except that when the indenation level falls
+/// the parser is stopped.
 #[macro_export]
 macro_rules! many0_block(
   ($i:expr, $len:expr, $submac:ident!( $($args:tt)* )) => (
