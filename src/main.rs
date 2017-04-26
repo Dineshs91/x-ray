@@ -14,14 +14,17 @@ mod cli;
 mod parser;
 
 use std::io::prelude::*;
+use std::fs;
 use std::fs::File;
+use std::path::PathBuf;
 
-use structures::{Config, Root, Module, Validate};
+use structures::{Config, Root, Module, Class, Function, Validate};
 use template::{class_template, function_template};
 use util::{write_to_file, create_package};
+use parser::{ItemKind};
 
-fn read_toml(conf_file: &str) -> String {
-    let file = File::open(conf_file);
+fn read_file(filename: &str) -> String {
+    let file = File::open(filename);
 
     let mut file_content = String::new();
 
@@ -31,8 +34,8 @@ fn read_toml(conf_file: &str) -> String {
     };
 
     match file.read_to_string(&mut file_content) {
-        Ok(x) => println!("Read size: {}", x),
-        Err(error) => panic!("There was an error {:?} reading the config file", error),
+        Ok(_) => {},
+        Err(error) => panic!("There was an error {:?} reading the file {}", error, filename),
     }
 
     // return the file content.
@@ -69,7 +72,7 @@ fn validate (root: Root) -> Root {
 }
 
 fn generate(skip_validations: bool, conf_file: String) {
-    let toml_file_content = read_toml(&conf_file);
+    let toml_file_content = read_file(&conf_file);
     let config: Config = toml::from_str(&toml_file_content).unwrap();
 
     // Root have packages
@@ -109,33 +112,107 @@ fn generate(skip_validations: bool, conf_file: String) {
     }
 }
 
-fn get_py_src_content() -> String {
-    let file = File::open("sample/display.py");
+/// Check if a given directory is a python package.
+fn is_package(dir_path: PathBuf) -> (bool, PathBuf) {
+    let dir_path_copy = dir_path.clone();
+    let dirs = fs::read_dir(dir_path).unwrap();
+    for dir in dirs {
+        let dir_entry = dir.unwrap();
+        let dir_path = dir_entry.path();
 
-    let mut file_content = String::new();
-
-    let mut file = match file {
-        Ok(file) => file,
-        Err(error) => panic!("Error {}", error)
-    };
-
-    match file.read_to_string(&mut file_content) {
-        Ok(x) => println!("Read size: {}", x),
-        Err(error) => panic!("There was an error {:?} reading the config file", error),
+        let file_name = dir_entry.file_name();
+        let file_name = file_name.to_str().unwrap();
+        if file_name == "__init__.py" {
+            return (true, dir_path);
+        }
     }
 
-    // return the file content.
-    file_content
+    (false, dir_path_copy)
 }
 
 fn parse(parse_dir: String) {
-    let src = get_py_src_content();
-    parser::parse(src.to_string());
+    //let src = get_py_src_content();
+    //parser::parse(src.to_string());
 
     // Start from a directory. Can add file support later.
     // Parse all 
     //   1. Individual modules.
     //   2. Packages. -> Modules.
+
+    let dir_path = PathBuf::from(parse_dir);
+    let dirs = fs::read_dir(dir_path).unwrap();
+
+    for dir in dirs {
+        let dir_entry = dir.unwrap();
+        let dir_path = dir_entry.path();
+        let is_dir: bool = dir_entry.metadata().unwrap().is_dir();
+
+        if is_dir == false {
+            let file_name = dir_entry.file_name();
+            let file_name = file_name.to_str().unwrap();
+            if file_name.ends_with(".py") {
+                let module_src = read_file(dir_path.to_str().unwrap());
+                let src_bytes = module_src.as_bytes();
+
+                let result = parser::parse(src_bytes).unwrap().1;
+                println!("Result1 is {:?}", result);
+                let mut func_vec: Vec<Function> = Vec::new();
+                let mut class_vec: Vec<Class> = Vec::new();
+
+                for res in result {
+                    match res.node {
+                        ItemKind::Function{name: name, description: desc, parameters: params} => {
+                            func_vec.push(Function {
+                                name: name,
+                                description: desc,
+                                parameters: params
+                            });
+                        },
+                        ItemKind::Class{name: name, description: desc, methods: mthds} => {
+                            class_vec.push(Class {
+                                name: name,
+                                description: desc,
+                                methods: mthds
+                            });
+                        },
+                        _ => println!("Found other type")
+                    }
+                }
+            }
+        } else {
+            let (is_py_package, dir_path) = is_package(dir_path);
+            if is_py_package == true {
+                parse_package(dir_path);
+            }
+        }
+    }
+}
+
+/// Parse the package and the modules it has.
+/// Do this recursively.
+fn parse_package(dir_path: PathBuf) {
+    let dirs = fs::read_dir(dir_path).unwrap();
+
+    for dir in dirs {
+        let dir_entry = dir.unwrap();
+        let dir_path = dir_entry.path();
+        let file_name = dir_entry.file_name();
+        let file_name = file_name.to_str().unwrap();
+
+        if file_name.ends_with(".py") {
+            let module_src = read_file(dir_path.to_str().unwrap());
+            let src_bytes = module_src.as_bytes();
+            let result = parser::parse(src_bytes);
+            println!("Result2 is {:?}", result);
+        } else {
+            let (is_py_package, dir_path) = is_package(dir_path);
+            if is_py_package == true {
+                // parse_package(dir_path);
+                // TODO: Fix this
+                println!("Found cascade packages");
+            }
+        }
+    }
 }
 
 fn main() {

@@ -9,12 +9,12 @@ use nom;
 use structures::{Module, Class, Function};
 
 #[derive(Debug, Eq, PartialEq)]
-struct Item {
+pub struct Item {
     pub node: ItemKind,
 }
 
 #[derive(Debug, Eq, PartialEq)]
-enum ItemKind {
+pub enum ItemKind {
     Import {path: String},
     ImportFrom {module: String, name: String, level: i32},
     Shebang {path: String},
@@ -179,10 +179,10 @@ named!(doc_string<String>,
     )
 );
 
-pub fn parse(source: String) {
-    let result = items(source.as_bytes());
+pub fn parse(source: &[u8]) -> nom::IResult<&[u8], Vec<Item>> {
+    let result = items(source);
 
-    println!("The result is {:?}", result);
+    result
 }
 
 #[test]

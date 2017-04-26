@@ -42,7 +42,6 @@ pub fn main() -> CliConf {
             .about("parse python source and generate conf file")
             .arg(Arg::with_name("dir")
                 .short("d")
-                .long("dir")
                 .value_name("dir")
                 .required(true)
                 .help("Provide the path of python project")));
@@ -51,7 +50,8 @@ pub fn main() -> CliConf {
 
     let mut skip_validations: bool = false;
     let mut conf_file = "";
-    if let Some(matches) = matches.subcommand_matches("test") {
+    let mut parse_dir = None;
+    if let Some(matches) = matches.subcommand_matches("gen") {
         if matches.is_present("skip_validations") {
             println!("Skipping python validations");
             skip_validations = true;
@@ -65,10 +65,9 @@ pub fn main() -> CliConf {
         None => false,
     };
 
-    let parse_dir = match matches.value_of("dir") {
-        Some(x) => Some(x.to_string()),
-        None => None
-    };
+    if let Some(matches) = matches.subcommand_matches("parse") {
+        parse_dir = Some(matches.value_of("dir").unwrap().to_string());
+    }
 
     let cli_conf: CliConf = CliConf {
         skip_validations: skip_validations,
