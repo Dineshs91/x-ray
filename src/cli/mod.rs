@@ -44,7 +44,12 @@ pub fn main() -> CliConf {
                 .short("d")
                 .value_name("dir")
                 .required(true)
-                .help("Provide the path of python project")));
+                .help("Provide the path of python project"))
+            .arg(Arg::with_name("conf_file")
+                .short("f")
+                .value_name("conf_file")
+                .required(true)
+                .help("Provide the name of the conf file ")));
 
     let matches = app.get_matches();
 
@@ -67,6 +72,7 @@ pub fn main() -> CliConf {
 
     if let Some(matches) = matches.subcommand_matches("parse") {
         parse_dir = Some(matches.value_of("dir").unwrap().to_string());
+        conf_file = matches.value_of("conf_file").unwrap();
     }
 
     let cli_conf: CliConf = CliConf {

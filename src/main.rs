@@ -115,7 +115,6 @@ fn generate(skip_validations: bool, conf_file: String) {
 /// Check if a given directory is a python package.
 fn is_package(dir_path: PathBuf) -> (bool, PathBuf) {
     let dir_path_copy = dir_path.clone();
-    println!("The directory path is inininin {:?}", dir_path);
     let dirs = fs::read_dir(dir_path).unwrap();
     for dir in dirs {
         let dir_entry = dir.unwrap();
@@ -247,6 +246,10 @@ fn parse_module(dir_path: PathBuf, file_name: &str) -> Module {
     };
 
     module_res
+}
+
+fn write_to_config() {
+
 }
 
 fn main() {
