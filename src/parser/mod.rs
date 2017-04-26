@@ -155,9 +155,10 @@ named!(item_fn<Item>, do_parse!(
     tag!("def") >>
     space: many1!(nom::space) >>
     name: map_res!(util::ident, std::str::from_utf8) >>
-    tag!("(") >>
+    ws!(tag!("(")) >>
     params: ws!(separated_list!(tag!(","), nom::alpha)) >>
-    tag!("):") >>
+    opt!(tag!(",")) >>
+    ws!(tag!("):")) >>
     opt!(nom::newline) >>
     description: opt!(doc_string) >>
     block!(start_len.len()) >>
@@ -410,6 +411,29 @@ class Animal:
 fn test_parser_item_fn() {
     let fn_content = r#"
 def hello(args):
+    """
+    This is the hello function.
+    """
+    pass
+"#;
+
+    let result = item_fn(fn_content.as_bytes());
+
+    let expected_result = Item {
+        node: ItemKind::Function {
+            name: "hello".to_string(),
+            description: Some("This is the hello function.".to_string()),
+            parameters: vec!("args".to_string())
+        }
+    };
+
+    assert_eq!(result.unwrap().1, expected_result);
+}
+
+#[test]
+fn test_parser_item_fn_arg_ending_with_comma() {
+    let fn_content = r#"
+def hello(args, ):
     """
     This is the hello function.
     """
