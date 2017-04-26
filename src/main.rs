@@ -151,39 +151,7 @@ fn parse(parse_dir: String) {
             let file_name = dir_entry.file_name();
             let file_name = file_name.to_str().unwrap();
             if file_name.ends_with(".py") {
-                let module_src = read_file(dir_path.to_str().unwrap());
-                let src_bytes = module_src.as_bytes();
-
-                let parsing_result = parser::parse(src_bytes).unwrap().1;
-                let mut func_vec: Vec<Function> = Vec::new();
-                let mut class_vec: Vec<Class> = Vec::new();
-
-                for res in parsing_result {
-                    match res.node {
-                        ItemKind::Function{name, description: desc, parameters: params} => {
-                            func_vec.push(Function {
-                                name: name,
-                                description: desc,
-                                parameters: params
-                            });
-                        },
-                        ItemKind::Class{name: name, description: desc, methods: mthds} => {
-                            class_vec.push(Class {
-                                name: name,
-                                description: desc,
-                                methods: mthds
-                            });
-                        },
-                        _ => println!("Found other type")
-                    }
-                }
-                let module_res = Module {
-                    name: file_name.to_string(),
-                    description: None,
-                    functions: func_vec,
-                    classes: class_vec
-                };
-                root_modules.push(module_res);
+                root_modules.push(parse_module(dir_path, file_name));
             }
         } else {            
             let (is_py_package, dir_path) = is_package(dir_path);
@@ -199,6 +167,8 @@ fn parse(parse_dir: String) {
         packages: root_packages,
         modules: root_modules
     };
+
+    println!("{:?}", root_res);
 }
 
 /// Parse the package and the modules it has.
@@ -224,39 +194,7 @@ fn parse_package(dir_path: PathBuf) -> Package {
         if is_dir == false {
 
             if file_name.ends_with(".py") {
-                let module_src = read_file(dir_path.to_str().unwrap());
-                let src_bytes = module_src.as_bytes();
-
-                let parsing_result = parser::parse(src_bytes).unwrap().1;
-                let mut func_vec: Vec<Function> = Vec::new();
-                let mut class_vec: Vec<Class> = Vec::new();
-
-                for res in parsing_result {
-                    match res.node {
-                        ItemKind::Function{name, description: desc, parameters: params} => {
-                            func_vec.push(Function {
-                                name: name,
-                                description: desc,
-                                parameters: params
-                            });
-                        },
-                        ItemKind::Class{name: name, description: desc, methods: mthds} => {
-                            class_vec.push(Class {
-                                name: name,
-                                description: desc,
-                                methods: mthds
-                            });
-                        },
-                        _ => println!("Found other type")
-                    }
-                }
-                let module_res = Module {
-                    name: file_name.to_string(),
-                    description: None,
-                    functions: func_vec,
-                    classes: class_vec
-                };
-                pac_modules.push(module_res);
+                pac_modules.push(parse_module(dir_path, file_name));
             }
         } else {
             let (is_py_package, dir_path) = is_package(dir_path);
@@ -272,6 +210,43 @@ fn parse_package(dir_path: PathBuf) -> Package {
         name: package_name,
         modules: pac_modules
     }
+}
+
+fn parse_module(dir_path: PathBuf, file_name: &str) -> Module {
+    let module_src = read_file(dir_path.to_str().unwrap());
+    let src_bytes = module_src.as_bytes();
+
+    let parsing_result = parser::parse(src_bytes).unwrap().1;
+    let mut func_vec: Vec<Function> = Vec::new();
+    let mut class_vec: Vec<Class> = Vec::new();
+
+    for res in parsing_result {
+        match res.node {
+            ItemKind::Function{name, description: desc, parameters: params} => {
+                func_vec.push(Function {
+                    name: name,
+                    description: desc,
+                    parameters: params
+                });
+            },
+            ItemKind::Class{name: name, description: desc, methods: mthds} => {
+                class_vec.push(Class {
+                    name: name,
+                    description: desc,
+                    methods: mthds
+                });
+            },
+            _ => println!("Found other type")
+        }
+    }
+    let module_res = Module {
+        name: file_name.to_string(),
+        description: None,
+        functions: func_vec,
+        classes: class_vec
+    };
+
+    module_res
 }
 
 fn main() {
