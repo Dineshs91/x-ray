@@ -18,7 +18,7 @@ use std::fs;
 use std::fs::File;
 use std::path::PathBuf;
 
-use structures::{Config, Root, Module, Class, Function, Validate};
+use structures::{Config, Root, Package, Module, Class, Function, Validate};
 use template::{class_template, function_template};
 use util::{write_to_file, create_package};
 use parser::{ItemKind};
@@ -131,16 +131,15 @@ fn is_package(dir_path: PathBuf) -> (bool, PathBuf) {
 }
 
 fn parse(parse_dir: String) {
-    //let src = get_py_src_content();
-    //parser::parse(src.to_string());
-
     // Start from a directory. Can add file support later.
     // Parse all 
     //   1. Individual modules.
     //   2. Packages. -> Modules.
-
+    let root_name = parse_dir.clone();
     let dir_path = PathBuf::from(parse_dir);
     let dirs = fs::read_dir(dir_path).unwrap();
+    let mut root_packages: Vec<Package> = Vec::new();
+    let mut root_modules: Vec<Module> = Vec::new();
 
     for dir in dirs {
         let dir_entry = dir.unwrap();
@@ -154,12 +153,11 @@ fn parse(parse_dir: String) {
                 let module_src = read_file(dir_path.to_str().unwrap());
                 let src_bytes = module_src.as_bytes();
 
-                let result = parser::parse(src_bytes).unwrap().1;
-                println!("Result1 is {:?}", result);
+                let parsing_result = parser::parse(src_bytes).unwrap().1;
                 let mut func_vec: Vec<Function> = Vec::new();
                 let mut class_vec: Vec<Class> = Vec::new();
 
-                for res in result {
+                for res in parsing_result {
                     match res.node {
                         ItemKind::Function{name: name, description: desc, parameters: params} => {
                             func_vec.push(Function {
@@ -178,14 +176,29 @@ fn parse(parse_dir: String) {
                         _ => println!("Found other type")
                     }
                 }
+                let module_res = Module {
+                    name: file_name.to_string(),
+                    description: None,
+                    functions: func_vec,
+                    classes: class_vec
+                };
+                root_modules.push(module_res);
             }
         } else {
             let (is_py_package, dir_path) = is_package(dir_path);
             if is_py_package == true {
                 parse_package(dir_path);
             }
-        }
+        } 
     }
+    let root_res = Root {
+        name: root_name,
+        description: None,
+        packages: root_packages,
+        modules: root_modules
+    };
+
+    println!("{:?}", root_res);
 }
 
 /// Parse the package and the modules it has.
