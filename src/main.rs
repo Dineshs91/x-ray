@@ -115,6 +115,7 @@ fn generate(skip_validations: bool, conf_file: String) {
 /// Check if a given directory is a python package.
 fn is_package(dir_path: PathBuf) -> (bool, PathBuf) {
     let dir_path_copy = dir_path.clone();
+    println!("The directory path is inininin {:?}", dir_path);
     let dirs = fs::read_dir(dir_path).unwrap();
     for dir in dirs {
         let dir_entry = dir.unwrap();
@@ -123,7 +124,7 @@ fn is_package(dir_path: PathBuf) -> (bool, PathBuf) {
         let file_name = dir_entry.file_name();
         let file_name = file_name.to_str().unwrap();
         if file_name == "__init__.py" {
-            return (true, dir_path);
+            return (true, dir_path_copy);
         }
     }
 
@@ -159,7 +160,7 @@ fn parse(parse_dir: String) {
 
                 for res in parsing_result {
                     match res.node {
-                        ItemKind::Function{name: name, description: desc, parameters: params} => {
+                        ItemKind::Function{name, description: desc, parameters: params} => {
                             func_vec.push(Function {
                                 name: name,
                                 description: desc,
@@ -184,10 +185,11 @@ fn parse(parse_dir: String) {
                 };
                 root_modules.push(module_res);
             }
-        } else {
+        } else {            
             let (is_py_package, dir_path) = is_package(dir_path);
             if is_py_package == true {
-                parse_package(dir_path);
+                let package_res = parse_package(dir_path);
+                root_packages.push(package_res);
             }
         } 
     }
@@ -197,14 +199,19 @@ fn parse(parse_dir: String) {
         packages: root_packages,
         modules: root_modules
     };
-
-    println!("{:?}", root_res);
 }
 
 /// Parse the package and the modules it has.
 /// Do this recursively.
-fn parse_package(dir_path: PathBuf) {
+fn parse_package(dir_path: PathBuf) -> Package {
+    let package_name = dir_path.clone();
+    let package_name = match package_name.file_name() {
+        Some(x) => x.to_str().unwrap_or("").to_string(),
+        None => "".to_string()
+    };
+
     let dirs = fs::read_dir(dir_path).unwrap();
+    let mut pac_modules: Vec<Module> = Vec::new();
 
     for dir in dirs {
         let dir_entry = dir.unwrap();
@@ -212,19 +219,58 @@ fn parse_package(dir_path: PathBuf) {
         let file_name = dir_entry.file_name();
         let file_name = file_name.to_str().unwrap();
 
-        if file_name.ends_with(".py") {
-            let module_src = read_file(dir_path.to_str().unwrap());
-            let src_bytes = module_src.as_bytes();
-            let result = parser::parse(src_bytes);
-            println!("Result2 is {:?}", result);
+        let is_dir: bool = dir_entry.metadata().unwrap().is_dir();
+
+        if is_dir == false {
+
+            if file_name.ends_with(".py") {
+                let module_src = read_file(dir_path.to_str().unwrap());
+                let src_bytes = module_src.as_bytes();
+
+                let parsing_result = parser::parse(src_bytes).unwrap().1;
+                let mut func_vec: Vec<Function> = Vec::new();
+                let mut class_vec: Vec<Class> = Vec::new();
+
+                for res in parsing_result {
+                    match res.node {
+                        ItemKind::Function{name, description: desc, parameters: params} => {
+                            func_vec.push(Function {
+                                name: name,
+                                description: desc,
+                                parameters: params
+                            });
+                        },
+                        ItemKind::Class{name: name, description: desc, methods: mthds} => {
+                            class_vec.push(Class {
+                                name: name,
+                                description: desc,
+                                methods: mthds
+                            });
+                        },
+                        _ => println!("Found other type")
+                    }
+                }
+                let module_res = Module {
+                    name: file_name.to_string(),
+                    description: None,
+                    functions: func_vec,
+                    classes: class_vec
+                };
+                pac_modules.push(module_res);
+            }
         } else {
             let (is_py_package, dir_path) = is_package(dir_path);
             if is_py_package == true {
-                // parse_package(dir_path);
-                // TODO: Fix this
-                println!("Found cascade packages");
+                //let package_res = parse_package(dir_path);
+                //root_packages.push(package_res);
+                println!("Hi");
             }
         }
+    }
+
+    Package {
+        name: package_name,
+        modules: pac_modules
     }
 }
 
