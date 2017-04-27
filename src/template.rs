@@ -100,8 +100,6 @@ class {{ class_name }}:
     {{#class_desc_bool}}"""
     {{ class_desc }}
     """{{/class_desc_bool}}
-    def __init__(self):
-        pass
 "#;
 
     let mut method_template_string = String::new();
