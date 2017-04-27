@@ -42,7 +42,7 @@ fn read_file(filename: &str) -> String {
     file_content
 }
 
-fn validate (root: Root) -> Root {
+fn validate (root: &Root) {
     for package in &root.packages {
         let ref modules: Vec<Module> = package.modules;
 
@@ -67,8 +67,6 @@ fn validate (root: Root) -> Root {
             }
         }
     }
-
-    root
 }
 
 fn generate(skip_validations: bool, conf_file: String) {
@@ -81,7 +79,7 @@ fn generate(skip_validations: bool, conf_file: String) {
     let mut root = config.root;
 
     if !skip_validations {
-        root = validate(root);
+        validate(&root);
     }
 
     for package in root.packages {
