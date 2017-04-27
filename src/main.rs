@@ -145,12 +145,12 @@ fn parse(parse_dir: String) -> Root {
             let file_name = dir_entry.file_name();
             let file_name = file_name.to_str().unwrap();
             if file_name.ends_with(".py") && file_name != "__init__.py" {
-                root_modules.push(parse_module(dir_path, file_name));
+                root_modules.push(parse_module(&dir_path, file_name));
             }
         } else {        
             let is_py_package = is_package(&dir_path);
             if is_py_package == true {
-                let package_res = parse_package(dir_path);
+                let package_res = parse_package(&dir_path);
                 root_packages.push(package_res);
             }
         } 
@@ -167,9 +167,8 @@ fn parse(parse_dir: String) -> Root {
 
 /// Parse the package and the modules it has.
 /// Do this recursively.
-fn parse_package(dir_path: PathBuf) -> Package {
-    let package_name = dir_path.clone();
-    let package_name = match package_name.file_name() {
+fn parse_package(dir_path: &PathBuf) -> Package {
+    let package_name = match dir_path.file_name() {
         Some(x) => x.to_str().unwrap_or("").to_string(),
         None => "".to_string()
     };
@@ -188,7 +187,7 @@ fn parse_package(dir_path: PathBuf) -> Package {
         if is_dir == false {
 
             if file_name.ends_with(".py") && file_name != "__init__.py" {
-                pac_modules.push(parse_module(dir_path, file_name));
+                pac_modules.push(parse_module(&dir_path, file_name));
             }
         } else {
             let is_py_package = is_package(&dir_path);
@@ -206,7 +205,7 @@ fn parse_package(dir_path: PathBuf) -> Package {
     }
 }
 
-fn parse_module(dir_path: PathBuf, file_name: &str) -> Module {
+fn parse_module(dir_path: &PathBuf, file_name: &str) -> Module {
     let module_src = read_file(dir_path.to_str().unwrap());
     let src_bytes = module_src.as_bytes();
 
