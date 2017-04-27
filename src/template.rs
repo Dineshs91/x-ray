@@ -156,8 +156,6 @@ class Animal:
     """
     This is the animal class.
     """
-    def __init__(self):
-        pass
 "#;
 
     assert_eq!(class_template_content, expected_class_template_content);
@@ -188,8 +186,6 @@ class Animal:
     """
     This is the animal class.
     """
-    def __init__(self):
-        pass
 
     def display(self, ):
         """
