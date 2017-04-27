@@ -130,7 +130,7 @@ fn is_package(dir_path: PathBuf) -> (bool, PathBuf) {
     (false, dir_path_copy)
 }
 
-fn parse(parse_dir: String) {
+fn parse(parse_dir: String) -> Root {
     // Start from a directory. Can add file support later.
     // Parse all 
     //   1. Individual modules.
@@ -149,10 +149,10 @@ fn parse(parse_dir: String) {
         if is_dir == false {
             let file_name = dir_entry.file_name();
             let file_name = file_name.to_str().unwrap();
-            if file_name.ends_with(".py") {
+            if file_name.ends_with(".py") && file_name != "__init__.py" {
                 root_modules.push(parse_module(dir_path, file_name));
             }
-        } else {            
+        } else {        
             let (is_py_package, dir_path) = is_package(dir_path);
             if is_py_package == true {
                 let package_res = parse_package(dir_path);
@@ -167,7 +167,7 @@ fn parse(parse_dir: String) {
         modules: root_modules
     };
 
-    println!("{:?}", root_res);
+    root_res
 }
 
 /// Parse the package and the modules it has.
@@ -192,7 +192,7 @@ fn parse_package(dir_path: PathBuf) -> Package {
 
         if is_dir == false {
 
-            if file_name.ends_with(".py") {
+            if file_name.ends_with(".py") && file_name != "__init__.py" {
                 pac_modules.push(parse_module(dir_path, file_name));
             }
         } else {
@@ -228,7 +228,7 @@ fn parse_module(dir_path: PathBuf, file_name: &str) -> Module {
                     parameters: params
                 });
             },
-            ItemKind::Class{name: name, description: desc, methods: mthds} => {
+            ItemKind::Class{name, description: desc, methods: mthds} => {
                 class_vec.push(Class {
                     name: name,
                     description: desc,
@@ -248,8 +248,12 @@ fn parse_module(dir_path: PathBuf, file_name: &str) -> Module {
     module_res
 }
 
-fn write_to_config() {
+/// Write the parsed content to a config file. (Toml/Yaml).
+fn write_to_config(conf_file: String, root: Root) {
+    let mut file = fs::File::create(conf_file).unwrap();
 
+    let toml = toml::Value::try_from(&root).unwrap();
+    file.write_all(toml.to_string().as_bytes()).expect("Could not write config to file");
 }
 
 fn main() {
@@ -260,7 +264,8 @@ fn main() {
     let parse_dir = cli_values.parse_dir;
 
     if parse_opt {
-        parse(parse_dir.unwrap());
+        let root_res = parse(parse_dir.unwrap());
+        write_to_config(conf_file, root_res);
     } else {
         generate(skip_validations, conf_file);
     }
