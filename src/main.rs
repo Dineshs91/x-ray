@@ -130,10 +130,6 @@ fn is_package(dir_path: &PathBuf) -> bool {
 }
 
 fn parse(parse_dir: String) -> Root {
-    // Start from a directory. Can add file support later.
-    // Parse all 
-    //   1. Individual modules.
-    //   2. Packages. -> Modules.
     let root_name = parse_dir.clone();
     let dir_path = PathBuf::from(parse_dir);
     let dirs = fs::read_dir(dir_path).unwrap();
