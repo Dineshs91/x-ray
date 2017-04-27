@@ -113,8 +113,7 @@ fn generate(skip_validations: bool, conf_file: String) {
 }
 
 /// Check if a given directory is a python package.
-fn is_package(dir_path: PathBuf) -> (bool, PathBuf) {
-    let dir_path_copy = dir_path.clone();
+fn is_package(dir_path: &PathBuf) -> bool {
     let dirs = fs::read_dir(dir_path).unwrap();
     for dir in dirs {
         let dir_entry = dir.unwrap();
@@ -123,11 +122,11 @@ fn is_package(dir_path: PathBuf) -> (bool, PathBuf) {
         let file_name = dir_entry.file_name();
         let file_name = file_name.to_str().unwrap();
         if file_name == "__init__.py" {
-            return (true, dir_path_copy);
+            return true;
         }
     }
 
-    (false, dir_path_copy)
+    false
 }
 
 fn parse(parse_dir: String) -> Root {
@@ -153,7 +152,7 @@ fn parse(parse_dir: String) -> Root {
                 root_modules.push(parse_module(dir_path, file_name));
             }
         } else {        
-            let (is_py_package, dir_path) = is_package(dir_path);
+            let is_py_package = is_package(&dir_path);
             if is_py_package == true {
                 let package_res = parse_package(dir_path);
                 root_packages.push(package_res);
@@ -196,7 +195,7 @@ fn parse_package(dir_path: PathBuf) -> Package {
                 pac_modules.push(parse_module(dir_path, file_name));
             }
         } else {
-            let (is_py_package, dir_path) = is_package(dir_path);
+            let is_py_package = is_package(&dir_path);
             if is_py_package == true {
                 //let package_res = parse_package(dir_path);
                 //root_packages.push(package_res);
