@@ -100,8 +100,6 @@ class {{ class_name }}:
     {{#class_desc_bool}}"""
     {{ class_desc }}
     """{{/class_desc_bool}}
-    def __init__(self):
-        pass
 "#;
 
     let mut method_template_string = String::new();
@@ -158,8 +156,6 @@ class Animal:
     """
     This is the animal class.
     """
-    def __init__(self):
-        pass
 "#;
 
     assert_eq!(class_template_content, expected_class_template_content);
@@ -190,8 +186,6 @@ class Animal:
     """
     This is the animal class.
     """
-    def __init__(self):
-        pass
 
     def display(self, ):
         """

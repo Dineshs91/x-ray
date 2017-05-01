@@ -2,13 +2,13 @@ extern crate serde;
 
 use regex::Regex;
 
-#[derive(Debug, Eq, PartialEq, Deserialize)]
+#[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Config {
 	pub root: Root,
 }
 
 // project root
-#[derive(Debug, Eq, PartialEq, Deserialize)]
+#[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Root {
 	pub name: String,
 	pub description: Option<String>,
@@ -21,16 +21,19 @@ pub struct Root {
 }
 
 // python package. Any directory which has a __init__.py file.
-#[derive(Debug, Eq, PartialEq, Deserialize)]
+#[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Package {
 	pub name: String,
+
+    #[serde(default)]
+    pub packages: Vec<Package>,
 
 	#[serde(default)]
 	pub modules: Vec<Module>,
 }
 
 // python module, any python file.
-#[derive(Debug, Eq, PartialEq, Deserialize)]
+#[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Module {
 	pub name: String,
     pub description: Option<String>,
@@ -42,7 +45,7 @@ pub struct Module {
 	pub classes: Vec<Class>,
 }
 
-#[derive(Debug, Eq, PartialEq, Deserialize)]
+#[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Class {
 	pub name: String,
 	pub description: Option<String>,
@@ -60,7 +63,7 @@ impl Validate for Class {
 }
 
 // structure for a forming python function.
-#[derive(Debug, Eq, PartialEq, Deserialize)]
+#[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Function {
     pub name: String,
     pub description: Option<String>,

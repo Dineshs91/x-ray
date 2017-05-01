@@ -6,6 +6,9 @@ filename = "main.py"
 [[root.packages]]
 name = "sample"
 
+[[root.packages.packages]]
+name = "nested_package"
+
 [[root.packages.modules]]
 name = "display"
 description = "This is the display module"
