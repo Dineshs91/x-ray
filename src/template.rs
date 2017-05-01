@@ -5,6 +5,24 @@ use self::rustache::{HashBuilder, Render};
 use structures::{Class, Function};
 
 
+pub fn module_desc_template(description: String) -> String {
+    let module_desc_template = r#"
+"""
+{{module_desc}}
+"""
+"#;
+ 
+    let mut data = HashBuilder::new();
+    data = data.insert("module_desc", description);
+
+    let mut out = Cursor::new(Vec::new());
+    data.render(module_desc_template, &mut out);
+
+    // return the filled template.
+    // TODO: Handle error's
+    String::from_utf8(out.into_inner()).unwrap()
+}
+
 pub fn function_template(function: Function) -> String {
     // return function template
     let mut func_desc_bool = false;

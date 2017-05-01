@@ -21,7 +21,7 @@ use std::path::{Path, PathBuf};
 
 use parser::{ItemKind};
 use util::{write_to_file, create_package};
-use template::{class_template, function_template};
+use template::{module_desc_template, class_template, function_template};
 use structures::{Config, Root, Package, Module, Class, Function, Validate};
 
 fn read_file(filename: &str) -> String {
@@ -103,6 +103,14 @@ fn generate_package_src(packages: Vec<Package>, package_path: &Path) {
 
             let classes = module.classes;
             let mut content = String::new();
+
+            match module.description {
+                Some(desc) => {
+                    content += &module_desc_template(desc);
+                    write_to_file(&package_path, &filename, &content);
+                },
+                None => {}
+            };
 
             for class in classes {
                 content += &class_template(class);
