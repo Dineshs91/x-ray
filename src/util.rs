@@ -6,14 +6,14 @@ use std::path::Path;
 const FILE_EXTENSION:&'static str = ".py";
 const INIT_FILE:&'static str = "__init__.py";
 
-pub fn write_to_file(path: &str, filename: &str, content: &str) {
+pub fn write_to_file(path: &Path, filename: &str, content: &str) {
 	// Write the python source to file.
 	// Args: file name, the content of the file.
 	//
 	// filename & content will be &str since we won't be manipulating it.
 	let filename = filename.to_string() + FILE_EXTENSION;
 
-	let path = Path::new(&path).join(filename);
+	let path = path.join(filename);
 	let mut file = match File::create(&path) {
 		Err(e) => panic!("Error occurred while trying to create file {}", e),
 		Ok(file) => file,
@@ -25,13 +25,12 @@ pub fn write_to_file(path: &str, filename: &str, content: &str) {
 	}
 }
 
-pub fn create_package(package_name: &str) {
-	let package_name = package_name.to_string();
+pub fn create_package(package_path: &Path) {
 	let init_file_path = INIT_FILE;
 
-	fs::create_dir(&package_name);
+	fs::create_dir(package_path);
 
-	let path = Path::new(&package_name).join(init_file_path);
+	let path = package_path.join(init_file_path);
 	match File::create(&path) {
 		Err(e) => panic!("Error occurred while trying to create file {}", e),
 		Ok(file) => file,

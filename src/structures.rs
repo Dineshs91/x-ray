@@ -25,6 +25,9 @@ pub struct Root {
 pub struct Package {
 	pub name: String,
 
+    #[serde(default)]
+    pub packages: Vec<Package>,
+
 	#[serde(default)]
 	pub modules: Vec<Module>,
 }

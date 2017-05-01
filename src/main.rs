@@ -15,13 +15,14 @@ mod parser;
 
 use std::io::prelude::*;
 use std::fs;
+use std::env;
 use std::fs::File;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
-use structures::{Config, Root, Package, Module, Class, Function, Validate};
-use template::{class_template, function_template};
-use util::{write_to_file, create_package};
 use parser::{ItemKind};
+use util::{write_to_file, create_package};
+use template::{class_template, function_template};
+use structures::{Config, Root, Package, Module, Class, Function, Validate};
 
 fn read_file(filename: &str) -> String {
     let file = File::open(filename);
@@ -74,7 +75,7 @@ fn generate(skip_validations: bool, conf_file: String) {
     let config: Config = toml::from_str(&toml_file_content).unwrap();
 
     // Root have packages
-    // Packages have modules
+    // Packages have modules. They can have nested packages.
     // Modules have functions
     let mut root = config.root;
 
@@ -82,10 +83,17 @@ fn generate(skip_validations: bool, conf_file: String) {
         validate(&root);
     }
 
-    for package in root.packages {
-        create_package(&package.name);
+    let root_path = env::current_dir().unwrap();
+    let root_path = root_path.as_path();
+    generate_package_src(root.packages, root_path);
+}
 
-        let path = package.name;
+fn generate_package_src(packages: Vec<Package>, package_path: &Path) {
+    for package in packages {
+        let package_path = package_path.join(package.name);
+        create_package(&package_path);
+
+        generate_package_src(package.packages, &package_path);
 
         let modules = package.modules;
 
@@ -98,14 +106,14 @@ fn generate(skip_validations: bool, conf_file: String) {
 
             for class in classes {
                 content += &class_template(class);
-                write_to_file(&path, &filename, &content);
+                write_to_file(&package_path, &filename, &content);
             }
 
             for function in functions {
                 content += &function_template(function);
             }
 
-            write_to_file(&path, &filename, &content);
+            write_to_file(&package_path, &filename, &content);
         }
     }
 }
@@ -173,6 +181,7 @@ fn parse_package(dir_path: &PathBuf) -> Package {
 
     let dirs = fs::read_dir(dir_path).unwrap();
     let mut pac_modules: Vec<Module> = Vec::new();
+    let mut nested_packages: Vec<Package> = Vec::new();
 
     for dir in dirs {
         let dir_entry = dir.unwrap();
@@ -190,15 +199,15 @@ fn parse_package(dir_path: &PathBuf) -> Package {
         } else {
             let is_py_package = is_package(&dir_path);
             if is_py_package == true {
-                //let package_res = parse_package(dir_path);
-                //root_packages.push(package_res);
-                println!("Hi");
+                let package_res = parse_package(&dir_path);
+                nested_packages.push(package_res);
             }
         }
     }
 
     Package {
         name: package_name,
+        packages: nested_packages,
         modules: pac_modules
     }
 }
