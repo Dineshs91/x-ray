@@ -252,9 +252,12 @@ fn parse_module(dir_path: &PathBuf, file_name: &str) -> Module {
 /// Write the parsed content to a config file. (Toml/Yaml).
 fn write_to_config(conf_file: String, root: Root) {
     let mut file = fs::File::create(conf_file).unwrap();
+    let config = Config {
+        root: root
+    };
 
-    let toml = toml::Value::try_from(&root).unwrap();
-    file.write_all(toml.to_string().as_bytes()).expect("Could not write config to file");
+    let toml_res = toml::Value::try_from(&config).unwrap();
+    file.write_all(toml_res.to_string().as_bytes()).expect("Could not write config to file");
 }
 
 fn main() {
