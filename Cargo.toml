@@ -4,11 +4,11 @@ version = "0.1.0"
 authors = ["dinesh <dineshpy07@gmail.com>"]
 
 [dependencies]
-toml = "0.3"
+toml = "0.4"
 rustc-serialize = "0.3"
 rustache = "^0.1"
-serde = "0.9"
-serde_derive = "0.9"
+serde = "1.0.2"
+serde_derive = "1.0.2"
 regex = "0.2"
 clap = "~2.19.0"
 nom = "^2.2"
