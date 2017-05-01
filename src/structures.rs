@@ -11,7 +11,6 @@ pub struct Config {
 #[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Root {
 	pub name: String,
-	pub description: Option<String>,
 
 	#[serde(default)]
 	pub packages: Vec<Package>,

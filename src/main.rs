@@ -163,7 +163,6 @@ fn parse(parse_dir: String) -> Root {
     }
     let root_res = Root {
         name: root_name,
-        description: None,
         packages: root_packages,
         modules: root_modules
     };

@@ -1,7 +1,5 @@
 [root]
 name = "root"
-description = "This is the root python file"
-filename = "main.py"
 
 [[root.packages]]
 name = "sample"
