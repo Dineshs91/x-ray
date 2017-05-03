@@ -22,6 +22,7 @@ pub enum ItemKind {
     Function {name: String, description: Option<String>, parameters: Vec<String>}
 }
 
+// TODO: Implement module doc string.
 named!(items<Vec<Item>>, many0!(alt!(
     shebang
     |
@@ -105,6 +106,17 @@ named!(item_import_from<Item>, do_parse!(
     })
 ));
 
+named!(item_module_doc_string<Item>, do_parse!(
+
+));
+
+/// Use this for parsing class inheritance
+/// Example:
+///
+/// class Dog(Animal):
+///    def __init__(self):
+///        pass
+///
 named!(parent<String>, do_parse!(
     tag!("(") >>
     parent: map_res!(take_until!(")"), std::str::from_utf8) >>
