@@ -6,7 +6,7 @@ use std;
 
 use nom;
 
-use structures::{Module, Class, Function};
+use structures::{Function};
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Item {

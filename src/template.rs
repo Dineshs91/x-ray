@@ -16,25 +16,22 @@ pub fn module_desc_template(description: String) -> String {
     data = data.insert("module_desc", description);
 
     let mut out = Cursor::new(Vec::new());
-    data.render(module_desc_template, &mut out);
+    match data.render(module_desc_template, &mut out) {
+        Ok(_) => {},
+        Err(e) => panic!("Error rendering template {:?}", e)
+    };
 
-    // return the filled template.
-    // TODO: Handle error's
     String::from_utf8(out.into_inner()).unwrap()
 }
 
 pub fn function_template(function: Function) -> String {
-    // return function template
     let mut func_desc_bool = false;
     let func_desc = match function.description {
         Some(val) => {
             func_desc_bool = true;
             val
         },
-        None => {
-            func_desc_bool = false;
-            String::new()
-        },
+        None => String::new()
     };
 
     let function_template = r#"
@@ -64,10 +61,11 @@ def {{func_name}}({{parameters}}):
     data = data.insert("func_desc_bool", func_desc_bool);
 
     let mut out = Cursor::new(Vec::new());
-    data.render(function_template, &mut out);
+    match data.render(function_template, &mut out) {
+        Ok(_) => {},
+        Err(e) => panic!("Error rendering template {:?}", e)
+    };
 
-    // return the filled template.
-    // TODO: Handle error's
     String::from_utf8(out.into_inner()).unwrap()
 }
 
@@ -79,23 +77,26 @@ pub fn method_template(method: Function) -> String {
         """{{/method_desc_bool}}
         pass
 "#;
-
-    let mut method_template_string = String::new();
-
-    let method_desc_bool = false;
+    let mut method_desc_bool = false;
 
     let method_desc = match method.description {
-        Some(val) => val,
+        Some(val) => {
+            method_desc_bool = true;
+            val
+        },
         None => String::new(),
     };
 
     let mut method_data = HashBuilder::new();
     method_data = method_data.insert("method_name", method.name);
-    method_data = method_data.insert("method_desc_bool", true);
+    method_data = method_data.insert("method_desc_bool", method_desc_bool);
     method_data = method_data.insert("method_desc", method_desc);
 
     let mut method_out = Cursor::new(Vec::new());
-    method_data.render(&method_template, &mut method_out);
+    match method_data.render(&method_template, &mut method_out) {
+        Ok(_) => {},
+        Err(e) => panic!("Error rendering template {:?}", e)
+    };
 
     String::from_utf8(method_out.into_inner()).unwrap()
 }
@@ -107,10 +108,7 @@ pub fn class_template(class: Class) -> String {
             class_desc_bool = true;
             val
         },
-        None => {
-            class_desc_bool = false;
-            String::new()
-        }
+        None => String::new()
     };
 
     let class_template = r#"
@@ -133,7 +131,10 @@ class {{ class_name }}:
     data = data.insert("class_desc_bool", class_desc_bool);
 
     let mut out = Cursor::new(Vec::new());
-    data.render(class_template, &mut out);
+    match data.render(class_template, &mut out) {
+        Ok(_) => {},
+        Err(e) => panic!("Error rendering template {:?}", e)
+    };
 
     // return the filled class template
     String::from_utf8(out.into_inner()).unwrap() + &method_template_string
