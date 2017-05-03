@@ -18,6 +18,7 @@ pub enum ItemKind {
     Import {path: String},
     ImportFrom {module: String, name: String, level: i32},
     Shebang {path: String},
+    Module {description: Option<String>},
     Class {name: String, description: Option<String>, methods: Vec<Function>},
     Function {name: String, description: Option<String>, parameters: Vec<String>}
 }
@@ -106,9 +107,14 @@ named!(item_import_from<Item>, do_parse!(
     })
 ));
 
-// named!(item_module_doc_string<Item>, do_parse!(
-
-// ));
+named!(item_module_doc_string<Item>, do_parse!(
+    description: opt!(doc_string) >>
+    (Item {
+        node: ItemKind::Module {
+            description: description
+        }
+    })
+));
 
 /// Use this for parsing class inheritance
 /// Example:
@@ -193,9 +199,16 @@ named!(doc_string<String>,
 );
 
 pub fn parse(source: &[u8]) -> Vec<Item> {
-    let result = items(source);
+    let mut result: Vec<Item> = Vec::new();
 
-    result.unwrap().1
+    // Module doc string should be the first statement in the module.
+    let item_module_doc_string_result = item_module_doc_string(source).unwrap();
+    result.push(item_module_doc_string_result.1);
+
+    let items_result = items(item_module_doc_string_result.0).unwrap();
+    result.extend(items_result.1);
+
+    result
 }
 
 #[test]
@@ -335,6 +348,26 @@ def hello():
 
     println!("Actual result is {:?}", actual_result);
     assert_eq!(actual_result.unwrap().1, expected_result);
+}
+
+#[test]
+fn test_item_module_doc_string() {
+    let module_content = r#"
+    """
+    This is the module doc string.
+    """
+
+    """
+    This is not the module doc string.
+    """
+"#;
+    let result = item_module_doc_string(module_content.as_bytes());
+    let expected_result = Item {
+        node: ItemKind::Module {
+            description: Some("This is the module doc string.".to_string())
+        }
+    };
+    assert_eq!(result.unwrap().1, expected_result);
 }
 
 #[test]

@@ -71,6 +71,7 @@ fn parse_module(dir_path: &PathBuf, file_name: &str) -> Module {
     let mut func_vec: Vec<Function> = Vec::new();
     let mut class_vec: Vec<Class> = Vec::new();
 
+    let mut module_description = None;
     for res in parsing_result {
         match res.node {
             ItemKind::Function{name, description: desc, parameters: params} => {
@@ -87,12 +88,15 @@ fn parse_module(dir_path: &PathBuf, file_name: &str) -> Module {
                     methods: mthds
                 });
             },
-            _ => println!("Found other type")
+            ItemKind::Module{description:desc} => {
+                module_description = desc;
+            },
+            _ => println!("Found other type in parsing result")
         }
     }
     let module_res = Module {
         name: file_name.to_string(),
-        description: None,
+        description: module_description,
         functions: func_vec,
         classes: class_vec
     };
