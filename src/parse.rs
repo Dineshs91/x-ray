@@ -67,7 +67,7 @@ fn parse_module(dir_path: &PathBuf, file_name: &str) -> Module {
     let module_src = util::read_file(dir_path.to_str().unwrap());
     let src_bytes = module_src.as_bytes();
 
-    let parsing_result = parser::parse(src_bytes).unwrap().1;
+    let parsing_result = parser::parse(src_bytes);
     let mut func_vec: Vec<Function> = Vec::new();
     let mut class_vec: Vec<Class> = Vec::new();
 

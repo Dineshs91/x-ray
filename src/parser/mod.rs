@@ -106,9 +106,9 @@ named!(item_import_from<Item>, do_parse!(
     })
 ));
 
-named!(item_module_doc_string<Item>, do_parse!(
+// named!(item_module_doc_string<Item>, do_parse!(
 
-));
+// ));
 
 /// Use this for parsing class inheritance
 /// Example:
@@ -192,10 +192,10 @@ named!(doc_string<String>,
     )
 );
 
-pub fn parse(source: &[u8]) -> nom::IResult<&[u8], Vec<Item>> {
+pub fn parse(source: &[u8]) -> Vec<Item> {
     let result = items(source);
 
-    result
+    result.unwrap().1
 }
 
 #[test]
