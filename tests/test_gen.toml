@@ -1,0 +1,43 @@
+[root]
+modules = []
+name = "tests/test_py_project"
+
+[[root.packages]]
+name = "api"
+packages = []
+
+[[root.packages.modules]]
+classes = []
+description = "This is the api module"
+name = "api"
+
+[[root.packages.modules.functions]]
+description = "This is the create api function"
+name = "create_api"
+parameters = ["id", "new"]
+
+[[root.packages]]
+name = "sample"
+
+[[root.packages.modules]]
+description = "This is the display module"
+name = "display"
+
+[[root.packages.modules.classes]]
+description = "This is the animal class"
+name = "Animal"
+
+[[root.packages.modules.classes.methods]]
+description = "Get the animal instance of this object"
+name = "get_animal"
+parameters = ["self"]
+
+[[root.packages.modules.functions]]
+description = "this is the display function"
+name = "display"
+parameters = ["msg"]
+
+[[root.packages.packages]]
+modules = []
+name = "nested_package"
+packages = []

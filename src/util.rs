@@ -49,7 +49,7 @@ pub fn write_to_file(path: &Path, filename: &str, content: &str) {
 }
 
 /// Write the parsed content to a config file. (Toml/Yaml).
-pub fn write_to_config(conf_file: String, root: Root) {
+pub fn write_to_config(conf_file: &str, root: Root) {
     let mut file = fs::File::create(conf_file).unwrap();
     let config = Config {
         root: root
@@ -62,7 +62,7 @@ pub fn write_to_config(conf_file: String, root: Root) {
 pub fn create_package(package_path: &Path) {
 	let init_file_path = INIT_FILE;
 
-	match fs::create_dir(package_path) {
+	match fs::create_dir_all(package_path) {
         Ok(_) => {},
         Err(e) => panic!("Failed to create package {}", e)
     };

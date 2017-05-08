@@ -1,5 +1,5 @@
-use std::path::Path;
-use std::env;
+use std::path::{Path, PathBuf};
+use std::fs;
 
 use toml;
 
@@ -72,7 +72,7 @@ fn generate_package_src(packages: Vec<Package>, package_path: &Path) {
     }
 }
 
-pub fn generate(skip_validations: bool, conf_file: String) {
+pub fn generate(skip_validations: bool, gen_dir: String, conf_file: String) {
     let toml_file_content = read_file(&conf_file);
     let config: Config = toml::from_str(&toml_file_content).unwrap();
 
@@ -85,7 +85,12 @@ pub fn generate(skip_validations: bool, conf_file: String) {
         validate(&root);
     }
 
-    let root_path = env::current_dir().unwrap();
+    fs::create_dir_all(&gen_dir);
+
+    // let root_path = env::current_dir().unwrap();
+    // let root_path = root_path.as_path();
+    let root_path = PathBuf::from(gen_dir);
     let root_path = root_path.as_path();
+
     generate_package_src(root.packages, root_path);
 }

@@ -8,3 +8,7 @@
 
 # Ignore python files
 *.py
+
+# Custom
+test_parse.toml
+test.toml

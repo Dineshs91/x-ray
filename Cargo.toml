@@ -3,6 +3,11 @@ name = "x-ray"
 version = "0.1.0"
 authors = ["dinesh <dineshpy07@gmail.com>"]
 
+[[bin]]
+bench = false
+path = "src/main.rs"
+name = "x-ray"
+
 [dependencies]
 toml = "0.4"
 rustc-serialize = "0.3"
