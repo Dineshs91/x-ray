@@ -62,7 +62,7 @@ pub fn write_to_config(conf_file: String, root: Root) {
 pub fn create_package(package_path: &Path) {
 	let init_file_path = INIT_FILE;
 
-	match fs::create_dir(package_path) {
+	match fs::create_dir_all(package_path) {
         Ok(_) => {},
         Err(e) => panic!("Failed to create package {}", e)
     };

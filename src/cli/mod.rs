@@ -1,3 +1,5 @@
+use std::env;
+
 use clap::{Arg, App, SubCommand};
 
 const ABOUT: &'static str = "
@@ -8,7 +10,8 @@ pub struct CliConf {
     pub skip_validations: bool,
     pub conf_file: Option<String>,
     pub parse: bool,
-    pub parse_dir: Option<String>
+    pub parse_dir: Option<String>,
+    pub gen_dir: Option<String>,
 }
 
 // There are 2 main parts
@@ -37,7 +40,11 @@ pub fn main() -> CliConf {
                 .short("f")
                 .value_name("conf_file")
                 .required(true)
-                .help("Provide the conf file")))
+                .help("Provide the conf file"))
+            .arg(Arg::with_name("dir")
+                .short("d")
+                .value_name("dir")
+                .help("Provide the path where the generated code should be put.")))
         .subcommand(SubCommand::with_name("parse")
             .about("parse python source and generate conf file")
             .arg(Arg::with_name("dir")
@@ -56,6 +63,7 @@ pub fn main() -> CliConf {
     let mut skip_validations: bool = false;
     let mut conf_file = "";
     let mut parse_dir = None;
+    let mut gen_dir = Some(get_current_directory());
     if let Some(matches) = matches.subcommand_matches("gen") {
         if matches.is_present("skip_validations") {
             println!("Skipping python validations");
@@ -63,6 +71,7 @@ pub fn main() -> CliConf {
         }
 
         conf_file = matches.value_of("conf_file").unwrap();
+        gen_dir = Some(matches.value_of("dir").unwrap().to_string());
     }
 
     let parse = match matches.subcommand_matches("parse") {
@@ -79,8 +88,14 @@ pub fn main() -> CliConf {
         skip_validations: skip_validations,
         conf_file: Some(conf_file.to_string()),
         parse: parse,
-        parse_dir: parse_dir
+        parse_dir: parse_dir,
+        gen_dir: gen_dir
     };
 
     return cli_conf;
+}
+
+fn get_current_directory() -> String {
+    let cwd = env::current_dir().unwrap();
+    cwd.to_str().unwrap().to_string()
 }
