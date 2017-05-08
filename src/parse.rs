@@ -104,8 +104,8 @@ fn parse_module(dir_path: &PathBuf, file_name: &str) -> Module {
     module_res
 }
 
-pub fn parse(parse_dir: String) -> Root {
-    let root_name = parse_dir.clone();
+pub fn parse(parse_dir: &str) -> Root {
+    let root_name = parse_dir.clone().to_string();
     let dir_path = PathBuf::from(parse_dir);
     let dirs = fs::read_dir(dir_path).unwrap();
     let mut root_packages: Vec<Package> = Vec::new();

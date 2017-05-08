@@ -24,8 +24,8 @@ fn main() {
     let gen_dir = cli_values.gen_dir;
 
     if parse_opt {
-        let root_res = parse::parse(parse_dir.unwrap());
-        util::write_to_config(conf_file, root_res);
+        let root_res = parse::parse(&parse_dir.unwrap());
+        util::write_to_config(&conf_file, root_res);
     } else {
         gen::generate(skip_validations, gen_dir.unwrap(), conf_file);
     }

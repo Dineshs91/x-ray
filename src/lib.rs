@@ -21,7 +21,7 @@ pub fn gen(gen_dir: String, conf_file: String) {
     gen::generate(false, gen_dir, conf_file);
 }
 
-pub fn parse(parse_dir: String, conf_file: String) {
-    let root_res = parse::parse(parse_dir);
+pub fn parse(parse_dir: &str, conf_file: &str) {
+    let root_res = parse::parse(&parse_dir);
     util::write_to_config(conf_file, root_res);
 }
