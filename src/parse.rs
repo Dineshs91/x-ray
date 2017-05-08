@@ -38,13 +38,14 @@ fn parse_package(dir_path: &PathBuf) -> Package {
         let dir_entry = dir.unwrap();
         let dir_path = dir_entry.path();
         let file_name = dir_entry.file_name();
-        let file_name = file_name.to_str().unwrap();
+        let mut file_name = file_name.to_str().unwrap();
 
         let is_dir: bool = dir_entry.metadata().unwrap().is_dir();
 
         if is_dir == false {
 
             if file_name.ends_with(".py") && file_name != "__init__.py" {
+                file_name = file_name.split(".").collect::<Vec<_>>()[0];
                 pac_modules.push(parse_module(&dir_path, file_name));
             }
         } else {
@@ -118,8 +119,9 @@ pub fn parse(parse_dir: &str) -> Root {
 
         if is_dir == false {
             let file_name = dir_entry.file_name();
-            let file_name = file_name.to_str().unwrap();
+            let mut file_name = file_name.to_str().unwrap();
             if file_name.ends_with(".py") && file_name != "__init__.py" {
+                file_name = file_name.split(".").collect::<Vec<_>>()[0];
                 root_modules.push(parse_module(&dir_path, file_name));
             }
         } else {        
