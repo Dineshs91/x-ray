@@ -1,6 +1,6 @@
 [root]
 modules = []
-name = "tests/test_py_project"
+name = "tests/test_output/src/test_py_project"
 
 [[root.packages]]
 name = "api"

@@ -72,8 +72,8 @@ fn generate_package_src(packages: Vec<Package>, package_path: &Path) {
     }
 }
 
-pub fn generate(skip_validations: bool, gen_dir: String, conf_file: String) {
-    let toml_file_content = read_file(&conf_file);
+pub fn generate(skip_validations: bool, gen_dir: String, conf_file: &str) {
+    let toml_file_content = read_file(conf_file);
     let config: Config = toml::from_str(&toml_file_content).unwrap();
 
     // Root have packages

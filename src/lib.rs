@@ -17,7 +17,7 @@ mod gen;
 
 
 
-pub fn gen(gen_dir: String, conf_file: String) {
+pub fn gen(gen_dir: String, conf_file: &str) {
     gen::generate(false, gen_dir, conf_file);
 }
 

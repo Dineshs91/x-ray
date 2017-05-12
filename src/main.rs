@@ -28,6 +28,6 @@ fn main() {
         let toml_res: String = util::get_toml_result(root_res);
         util::write_to_config(&conf_file, toml_res);
     } else {
-        gen::generate(skip_validations, gen_dir.unwrap(), conf_file);
+        gen::generate(skip_validations, gen_dir.unwrap(), &conf_file);
     }
 }
