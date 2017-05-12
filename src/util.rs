@@ -48,15 +48,20 @@ pub fn write_to_file(path: &Path, filename: &str, content: &str) {
 	}
 }
 
-/// Write the parsed content to a config file. (Toml/Yaml).
-pub fn write_to_config(conf_file: &str, root: Root) {
-    let mut file = fs::File::create(conf_file).unwrap();
+pub fn get_toml_result(root: Root) -> String {
     let config = Config {
         root: root
     };
 
     let toml_res = toml::Value::try_from(&config).unwrap();
-    file.write_all(toml_res.to_string().as_bytes()).expect("Could not write config to file");
+    toml_res.to_string()
+}
+
+/// Write the parsed content to a config file. (Toml/Yaml).
+pub fn write_to_config(conf_file: &str, toml_res: String) {
+    let mut file = fs::File::create(conf_file).unwrap();
+
+    file.write_all(toml_res.as_bytes()).expect("Could not write config to file");
 }
 
 pub fn create_package(package_path: &Path) {

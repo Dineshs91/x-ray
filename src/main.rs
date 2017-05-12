@@ -25,7 +25,8 @@ fn main() {
 
     if parse_opt {
         let root_res = parse::parse(&parse_dir.unwrap());
-        util::write_to_config(&conf_file, root_res);
+        let toml_res: String = util::get_toml_result(root_res);
+        util::write_to_config(&conf_file, toml_res);
     } else {
         gen::generate(skip_validations, gen_dir.unwrap(), conf_file);
     }

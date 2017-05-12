@@ -23,5 +23,6 @@ pub fn gen(gen_dir: String, conf_file: String) {
 
 pub fn parse(parse_dir: &str, conf_file: &str) {
     let root_res = parse::parse(&parse_dir);
-    util::write_to_config(conf_file, root_res);
+    let toml_res: String = util::get_toml_result(root_res);
+    util::write_to_config(&conf_file, toml_res);
 }
