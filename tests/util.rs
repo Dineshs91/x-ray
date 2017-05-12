@@ -1,3 +1,4 @@
+use std::env;
 use std::path::Path;
 use std::io::prelude::*;
 use std::fs::{self, File};
@@ -19,6 +20,11 @@ pub fn read_file(filename: &str) -> String {
 
     // return the file content.
     file_content
+}
+
+pub fn get_current_directory() -> String {
+    let cwd = env::current_dir().unwrap();
+    cwd.to_str().unwrap().to_string()
 }
 
 /// Remove all the files and nested directories in a directory.

@@ -20,7 +20,8 @@ pub enum ItemKind {
     Shebang {path: String},
     Module {description: Option<String>},
     Class {name: String, description: Option<String>, methods: Vec<Function>},
-    Function {name: String, description: Option<String>, parameters: Vec<String>}
+    Function {name: String, description: Option<String>, parameters: Vec<String>},
+    Code {code: String}
 }
 
 // TODO: Implement module doc string.
@@ -34,7 +35,19 @@ named!(items<Vec<Item>>, many0!(alt!(
     item_class
     |
     item_fn
+    |
+    item_code
 )));
+
+named!(item_code<Item>, do_parse!(
+    many0!(nom::newline) >>
+    code: map_res!(take_until_and_consume!("\n"), std::str::from_utf8) >>
+    (Item {
+        node: ItemKind::Code {
+            code: code.to_string()
+        }
+    })
+));
 
 named!(shebang<Item>, do_parse!(
     many0!(nom::newline) >>
