@@ -27,6 +27,12 @@ pub fn get_current_directory() -> String {
     cwd.to_str().unwrap().to_string()
 }
 
+/// Create test directories
+/// tests
+///   |--- test_input/conf
+///   |--- test_intput/src
+///   |--- test_output/conf
+///   |--- test_output/src
 pub fn create_test_dirs() {
     fs::create_dir_all("tests/test_input/src");
     fs::create_dir_all("tests/test_input/conf");
