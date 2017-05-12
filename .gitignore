@@ -7,7 +7,7 @@
 # Cargo.lock
 
 # Ignore python files
-*.py
+#*.py
 
 # Custom
 test_parse.toml
