@@ -27,6 +27,13 @@ pub fn get_current_directory() -> String {
     cwd.to_str().unwrap().to_string()
 }
 
+pub fn create_test_dirs() {
+    fs::create_dir_all("tests/test_input/src");
+    fs::create_dir_all("tests/test_input/conf");
+    fs::create_dir_all("tests/test_output/src");
+    fs::create_dir_all("tests/test_output/conf");
+}
+
 /// Remove all the files and nested directories in a directory.
 pub fn clean_dir(dir: &Path) -> bool {
     if dir.is_dir() {

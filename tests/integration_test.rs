@@ -8,10 +8,7 @@ use std::path::Path;
 
 #[test]
 fn test_src_parse_gen() {
-    // Create test directories
-    fs::create_dir_all("tests/input/src");
-    fs::create_dir_all("tests/output/src");
-    fs::create_dir_all("tests/output/conf");
+    util::create_test_dirs();
 
     let conf_file_gen = "tests/test_input/conf/test_gen.toml";
     let conf_file_parse = "tests/test_output/conf/test_parse.toml";
@@ -38,9 +35,7 @@ fn test_src_parse_gen() {
 #[test]
 fn test_src_main() {
     // Create test directories
-    fs::create_dir_all("tests/input/src");
-    fs::create_dir_all("tests/output/src");
-    fs::create_dir_all("tests/output/conf");
+    util::create_test_dirs();
 
     let src_input = "tests/test_input/src";
     let conf_file_parse = "tests/test_output/conf/main.toml";
