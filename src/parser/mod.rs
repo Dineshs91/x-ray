@@ -187,7 +187,7 @@ named!(item_fn<Item>, do_parse!(
     space: many1!(nom::space) >>
     name: map_res!(util::ident, std::str::from_utf8) >>
     ws!(tag!("(")) >>
-    params: ws!(separated_list!(tag!(","), nom::alpha)) >>
+    params: ws!(separated_list!(tag!(","), util::ident)) >>
     opt!(tag!(",")) >>
     ws!(tag!("):")) >>
     opt!(nom::newline) >>
