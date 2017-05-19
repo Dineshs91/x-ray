@@ -153,6 +153,7 @@ named!(item_class<Item>, do_parse!(
     tag!(":") >>
     description: opt!(doc_string) >>
     opt!(util::emptyline) >>
+    opt!(take_until_line_containing_tag!("def")) >>
     methods: many0_block!(start_len.len(), item_fn) >>
     (Item {
         node: ItemKind::Class {
@@ -447,6 +448,7 @@ class Animal:
     let expected_result = Item {
         node: item_kind
     };
+
     assert_eq!(result.unwrap().1, expected_result);
 }
 

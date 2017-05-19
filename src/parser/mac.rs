@@ -117,3 +117,34 @@ macro_rules! many0_block(
 // Take until a line containing a given tag.
 // starting from \n to the next \n see if the content has the tag.
 // If it has then consume until the previous line. Else consume the line.
+#[macro_export]
+macro_rules! take_until_line_containing_tag (
+  ($i:expr, $substr:expr) => (
+    {
+      use nom::InputLength;
+      use nom::FindSubstring;
+      use nom::Slice;
+
+      let res: nom::IResult<_,_> = if $substr.input_len() > $i.input_len() {
+        nom::IResult::Incomplete(nom::Needed::Size($substr.input_len()))
+      } else {
+        match ($i).find_substring($substr) {
+          None => {
+            nom::IResult::Error(error_position!(nom::ErrorKind::TakeUntil,$i))
+          },
+          Some(index) => {
+            let mut ind = index;
+            while ind != 0 {
+                if $i.slice(ind..ind + 1)[0] == 10 {
+                    break;
+                }
+                ind -= 1;
+            }
+            nom::IResult::Done($i.slice(ind..), $i.slice(0..ind))
+          },
+        }
+      };
+      res
+    }
+  );
+);
