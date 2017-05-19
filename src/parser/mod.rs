@@ -207,7 +207,7 @@ named!(item_fn<Item>, do_parse!(
 named!(doc_string<String>,
     do_parse!(
         opt!(nom::multispace) >>
-        doc_string: map_res!(delimited!(tag!("\"\"\""), is_not!("\"\"\""), tag!("\"\"\"")), std::str::from_utf8) >>
+        doc_string: map_res!(delimited!(tag!("\"\"\""), take_until!("\"\"\""), tag!("\"\"\"")), std::str::from_utf8) >>
         (doc_string.trim().to_string())
     )
 );
@@ -686,4 +686,17 @@ fn test_parser_doc_string() {
     let result = doc_string(doc_string_content.as_bytes());
 
     assert_eq!(result.unwrap().1, "This is the description string.");
+}
+
+#[test]
+fn test_parser_doc_string_with_double_quotes() {
+    let doc_string_content = r#"
+    """
+    This is the description "string".
+    """
+    "#;
+
+    let result = doc_string(doc_string_content.as_bytes());
+
+    assert_eq!(result.unwrap().1, "This is the description \"string\".");
 }
