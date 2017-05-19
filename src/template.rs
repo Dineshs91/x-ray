@@ -71,12 +71,23 @@ def {{func_name}}({{parameters}}):
 
 pub fn method_template(method: Function) -> String {
     let method_template = r#"
-    def {{ method_name }}(self, ):
+    def {{ method_name }}({{method_parameters}}):
         {{#method_desc_bool}}"""
         {{ method_desc }}
         """{{/method_desc_bool}}
         pass
 "#;
+    let mut method_parameters = String::new();
+    let mut i:i32 = 0;
+
+    for parameter in method.parameters {
+        if i != 0 {
+            method_parameters += ", "
+        }
+        method_parameters += &parameter;
+        i += 1;
+    }
+
     let mut method_desc_bool = false;
 
     let method_desc = match method.description {
@@ -88,6 +99,7 @@ pub fn method_template(method: Function) -> String {
     };
 
     let mut method_data = HashBuilder::new();
+    method_data = method_data.insert("method_parameters", method_parameters);
     method_data = method_data.insert("method_name", method.name);
     method_data = method_data.insert("method_desc_bool", method_desc_bool);
     method_data = method_data.insert("method_desc", method_desc);
@@ -146,12 +158,12 @@ fn test_function_template() {
     let function = Function {
         name: "display".to_string(),
         description: Some("This is the display function.".to_string()),
-        parameters: Vec::new()
+        parameters: vec!["self".to_string(), "params".to_string()]
     };
 
     let function_template_content = function_template(function);
     let expected_function_template_content = r#"
-def display():
+def display(self, params):
     """
     This is the display function.
     """
@@ -206,7 +218,7 @@ class Animal:
     This is the animal class.
     """
 
-    def display(self, ):
+    def display():
         """
         This is the display function.
         """

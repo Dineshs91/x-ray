@@ -36,10 +36,13 @@ pub fn ident<T>(input: T) -> IResult<T, T> where
 /// 0x5F (underscore _)
 /// Checks for valid identifier [A-Za-z_]
 /// Allow equal to (=) 0x3D
+/// Allow {} 0x7B 0x7D
+/// Allow [] 0x5B 0x5D
 fn is_func_param(chr: char) -> bool
 {
     let chr: u8 = chr as u8;
     (chr >= 0x41 && chr <= 0x5A) || (chr >= 0x61 && chr <= 0x7A) || (chr == 0x5F) || (chr == 0x3D)
+    || (chr == 0x7B) || (chr == 0x7D) || (chr == 0x5B) || (chr == 0x5D)
 }
 
 pub fn func_param<T>(input: T) -> IResult<T, T> where
