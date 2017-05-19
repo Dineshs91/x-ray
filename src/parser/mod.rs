@@ -188,7 +188,7 @@ named!(item_fn<Item>, do_parse!(
     space: many1!(nom::space) >>
     name: map_res!(util::ident, std::str::from_utf8) >>
     ws!(tag!("(")) >>
-    params: ws!(separated_list!(tag!(","), util::ident)) >>
+    params: ws!(separated_list!(tag!(","), util::func_param)) >>
     opt!(tag!(",")) >>
     ws!(tag!("):")) >>
     opt!(nom::newline) >>
@@ -568,6 +568,29 @@ def __hello__(args):
         }
     };
 
+    assert_eq!(result.unwrap().1, expected_result);
+}
+
+#[test]
+fn test_parser_item_fn_with_default_arg_value() {
+    let fn_content = r#"
+def __hello__(args, display=True):
+    """
+    This is the hello function.
+    """
+    pass
+"#;
+
+    let result = item_fn(fn_content.as_bytes());
+
+    let expected_result = Item {
+        node: ItemKind::Function {
+            name: "__hello__".to_string(),
+            description: Some("This is the hello function.".to_string()),
+            parameters: vec!("args".to_string(), "display=True".to_string())
+        }
+    };
+    println!("The result is: {:?}", result);
     assert_eq!(result.unwrap().1, expected_result);
 }
 
