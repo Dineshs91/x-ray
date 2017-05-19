@@ -43,7 +43,12 @@ fn generate_package_src(packages: Vec<Package>, package_path: &Path) {
 
         let modules = package.modules;
 
-        for module in modules {
+        generate_module_src(modules, &package_path);
+    }
+}
+
+fn generate_module_src(modules: Vec<Module>, path: &Path) {
+    for module in modules {
             let functions = module.functions;
             let ref filename = module.name;
 
@@ -53,23 +58,22 @@ fn generate_package_src(packages: Vec<Package>, package_path: &Path) {
             match module.description {
                 Some(desc) => {
                     content += &module_desc_template(desc);
-                    write_to_file(&package_path, &filename, &content);
+                    write_to_file(&path, &filename, &content);
                 },
                 None => {}
             };
 
             for class in classes {
                 content += &class_template(class);
-                write_to_file(&package_path, &filename, &content);
+                write_to_file(&path, &filename, &content);
             }
 
             for function in functions {
                 content += &function_template(function);
             }
 
-            write_to_file(&package_path, &filename, &content);
+            write_to_file(&path, &filename, &content);
         }
-    }
 }
 
 pub fn generate(skip_validations: bool, gen_dir: String, conf_file: &str) {
@@ -92,5 +96,6 @@ pub fn generate(skip_validations: bool, gen_dir: String, conf_file: &str) {
     let root_path = PathBuf::from(gen_dir);
     let root_path = root_path.as_path();
 
+    generate_module_src(root.modules, root_path);
     generate_package_src(root.packages, root_path);
 }
