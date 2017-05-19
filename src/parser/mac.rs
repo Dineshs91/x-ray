@@ -113,3 +113,7 @@ macro_rules! many0_block(
     many0_block!($i, $len, call!($f));
   );
 );
+
+// Take until a line containing a given tag.
+// starting from \n to the next \n see if the content has the tag.
+// If it has then consume until the previous line. Else consume the line.

@@ -151,8 +151,8 @@ named!(item_class<Item>, do_parse!(
     name: map_res!(nom::alpha, std::str::from_utf8) >>
     opt!(parent) >>
     tag!(":") >>
-    opt!(nom::newline) >>
     description: opt!(doc_string) >>
+    opt!(util::emptyline) >>
     methods: many0_block!(start_len.len(), item_fn) >>
     (Item {
         node: ItemKind::Class {
@@ -387,6 +387,41 @@ fn test_item_module_doc_string() {
 fn test_parser_class() {
     let class_content = r#"
 class Animal:
+    def __init__(self):
+        pass
+"#;
+
+    let result = item_class(class_content.as_bytes());
+
+    let mut params: Vec<String> = Vec::new();
+
+    params.push("self".to_string());
+
+    let method = Function {
+        name: "__init__".to_string(),
+        description: None,
+        parameters: params
+    };
+
+    let item_kind = ItemKind::Class {
+        name: "Animal".to_string(),
+        description: None,
+        methods: vec!(method)
+    };
+
+    let expected_result = Item {
+        node: item_kind
+    };
+
+    assert_eq!(result.unwrap().1, expected_result);
+}
+
+#[test]
+fn test_parser_class_with_class_variables() {
+    let class_content = r#"
+class Animal:
+    start = True
+
     def __init__(self):
         pass
 "#;

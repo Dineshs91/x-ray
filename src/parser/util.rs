@@ -32,3 +32,35 @@ pub fn ident<T>(input: T) -> IResult<T, T> where
     }
     Done(input.slice(input_length..), input)
 }
+
+pub fn emptyline<T>(input: T) -> IResult<T, T> where
+    T: Slice<Range<usize>>+Slice<RangeFrom<usize>>+Slice<RangeTo<usize>>,
+    T: InputIter+InputLength
+{
+    let input_length = input.input_len();
+    if input_length == 0 {
+        return Incomplete(Needed::Unknown);
+    }
+
+    let mut start: bool = false;
+    let mut newline_index: usize = 0;
+
+    for(idx, item) in input.iter_indices() {
+        let item_char = item.as_char();
+        if item_char == '\n' {
+            start = true;
+            newline_index = idx;
+        }
+
+        if start == true && item_char == ' ' {
+            continue;
+        }
+
+        if start == true && !(item_char == '\n' || item_char == ' ') {
+            return Done(input.slice(newline_index..), input.slice(0..newline_index));
+        } else if start == false && (item_char != '\n') {
+            return Done(input.slice(input_length..), input);
+        }
+    }
+    Done(input.slice(input_length..), input)
+}
