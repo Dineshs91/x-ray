@@ -184,6 +184,7 @@ named!(item_class<Item>, do_parse!(
 named!(item_fn<Item>, do_parse!(
     many0!(nom::newline) >>
     start_len: many0!(tag!(" ")) >>
+    decorators: many0!(decorator) >>
     tag!("def") >>
     space: many1!(nom::space) >>
     name: map_res!(util::ident, std::str::from_utf8) >>
@@ -204,6 +205,15 @@ named!(item_fn<Item>, do_parse!(
     })
 ));
 
+named!(decorator<String>,
+    do_parse!(
+        tag!("@") >>
+        decorator_string: map_res!(take_until_and_consume!("\n"), std::str::from_utf8) >>
+
+        (decorator_string.to_string())
+    )
+);
+
 named!(doc_string<String>,
     do_parse!(
         opt!(nom::multispace) >>
@@ -213,7 +223,8 @@ named!(doc_string<String>,
                 |
                 delimited!(tag!("'''"), take_until!("'''"), tag!("'''"))
             ),
-            std::str::from_utf8) >>
+            std::str::from_utf8
+        ) >>
         (doc_string.trim().to_string())
     )
 );
@@ -528,6 +539,32 @@ def hello(args):
         }
     };
 
+    assert_eq!(result.unwrap().1, expected_result);
+}
+
+#[test]
+fn test_parser_item_fn_with_decorator() {
+    let fn_content = r#"
+@test1
+@test2
+def hello(args):
+    """
+    This is the hello function.
+    """
+    pass
+"#;
+
+    let result = item_fn(fn_content.as_bytes());
+
+    let expected_result = Item {
+        node: ItemKind::Function {
+            name: "hello".to_string(),
+            description: Some("This is the hello function.".to_string()),
+            parameters: vec!("args".to_string())
+        }
+    };
+
+    println!("The result is [{:?}]", result);
     assert_eq!(result.unwrap().1, expected_result);
 }
 
