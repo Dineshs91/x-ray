@@ -4,6 +4,7 @@ use std::fs::File;
 use std::path::Path;
 
 use toml;
+use serde_yaml;
 
 use structures::{Config, Root};
 
@@ -55,6 +56,15 @@ pub fn get_toml_result(root: Root) -> String {
 
     let toml_res = toml::Value::try_from(&config).unwrap();
     toml_res.to_string()
+}
+
+pub fn get_yaml_result(root: Root) -> String {
+    let config = Config {
+        root: root
+    };
+
+    let yaml_res = serde_yaml::to_string(&config).unwrap();
+    yaml_res.to_string()
 }
 
 /// Write the parsed content to a config file. (Toml/Yaml).
