@@ -178,6 +178,7 @@ fn test_class_template() {
     let class = Class {
         name: "Animal".to_string(),
         description: Some("This is the animal class.".to_string()),
+        parents: Vec::new(),
         methods: Vec::new()
     };
 
@@ -207,6 +208,7 @@ fn test_class_template_with_methods() {
     let class = Class {
         name: "Animal".to_string(),
         description: Some("This is the animal class.".to_string()),
+        parents: Vec::new(),
         methods: methods
     };
 

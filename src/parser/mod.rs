@@ -19,7 +19,7 @@ pub enum ItemKind {
     ImportFrom {module: String, name: String, level: i32},
     Shebang {path: String},
     Module {description: Option<String>},
-    Class {name: String, description: Option<String>, methods: Vec<Function>},
+    Class {name: String, description: Option<String>, parents: Vec<String>, methods: Vec<Function>},
     Function {name: String, description: Option<String>, parameters: Vec<String>},
     Code {code: String}
 }
@@ -136,11 +136,11 @@ named!(item_module_doc_string<Item>, do_parse!(
 ///    def __init__(self):
 ///        pass
 ///
-named!(parent<String>, do_parse!(
+named!(parent<Vec<&[u8]>>, do_parse!(
     tag!("(") >>
-    parent: map_res!(take_until!(")"), std::str::from_utf8) >>
+    parents: ws!(separated_list!(tag!(","), util::ident)) >>
     tag!(")") >>
-    (parent.to_string())
+    (parents)
 ));
 
 named!(item_class<Item>, do_parse!(
@@ -149,16 +149,26 @@ named!(item_class<Item>, do_parse!(
     tag!("class") >>
     many1!(nom::space) >>
     name: map_res!(nom::alpha, std::str::from_utf8) >>
-    opt!(parent) >>
+    parents: opt!(parent) >>
     tag!(":") >>
     description: opt!(doc_string) >>
     opt!(util::emptyline) >>
     opt!(take_until_line_containing_tag!("def")) >>
     methods: many0_block!(start_len.len(), item_fn) >>
     (Item {
+
         node: ItemKind::Class {
             name: name.to_string(),
             description: description,
+            parents: {
+                let parents = match parents {
+                    Some(x) => x,
+                    None => Vec::new()
+                };
+
+                // Return parents after converting to String.
+                parents.iter().map(|x| std::str::from_utf8(x).unwrap().to_string()).collect::<Vec<_>>()
+            },
             methods: {
                 let mut result = Vec::new();
 
@@ -404,7 +414,7 @@ fn test_item_module_doc_string() {
 #[test]
 fn test_parser_class() {
     let class_content = r#"
-class Animal:
+class Animal():
     def __init__(self):
         pass
 "#;
@@ -424,6 +434,41 @@ class Animal:
     let item_kind = ItemKind::Class {
         name: "Animal".to_string(),
         description: None,
+        parents: Vec::new(),
+        methods: vec!(method)
+    };
+
+    let expected_result = Item {
+        node: item_kind
+    };
+
+    assert_eq!(result.unwrap().1, expected_result);
+}
+
+#[test]
+fn test_parser_class_with_inheritance() {
+    let class_content = r#"
+class Animal(Object):
+    def __init__(self):
+        pass
+"#;
+
+    let result = item_class(class_content.as_bytes());
+
+    let mut params: Vec<String> = Vec::new();
+
+    params.push("self".to_string());
+
+    let method = Function {
+        name: "__init__".to_string(),
+        description: None,
+        parameters: params
+    };
+
+    let item_kind = ItemKind::Class {
+        name: "Animal".to_string(),
+        description: None,
+        parents: vec!("Object".to_string()),
         methods: vec!(method)
     };
 
@@ -459,6 +504,7 @@ class Animal:
     let item_kind = ItemKind::Class {
         name: "Animal".to_string(),
         description: None,
+        parents: Vec::new(),
         methods: vec!(method)
     };
 
@@ -510,6 +556,7 @@ class Animal:
     let item_kind = ItemKind::Class {
         name: "Animal".to_string(),
         description: Some("Animal class.".to_string()),
+        parents: Vec::new(),
         methods: vec!(method1, method2)
     };
 
@@ -722,6 +769,7 @@ def display(msg):
         node: ItemKind::Class {
             name: "Animal".to_string(),
             description: Some("This is the animal class.".to_string()),
+            parents: Vec::new(),
             methods: vec!(init_method, get_animal_method)
         }
     };

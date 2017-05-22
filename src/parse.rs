@@ -82,10 +82,11 @@ fn parse_module(dir_path: &PathBuf, file_name: &str) -> Module {
                     parameters: params
                 });
             },
-            ItemKind::Class{name, description: desc, methods: mthds} => {
+            ItemKind::Class{name, description: desc, parents, methods: mthds} => {
                 class_vec.push(Class {
                     name: name,
                     description: desc,
+                    parents: parents,
                     methods: mthds
                 });
             },
