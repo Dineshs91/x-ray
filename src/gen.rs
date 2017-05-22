@@ -49,31 +49,31 @@ fn generate_package_src(packages: Vec<Package>, package_path: &Path) {
 
 fn generate_module_src(modules: Vec<Module>, path: &Path) {
     for module in modules {
-            let functions = module.functions;
-            let ref filename = module.name;
+        let functions = module.functions;
+        let ref filename = module.name;
 
-            let classes = module.classes;
-            let mut content = String::new();
+        let classes = module.classes;
+        let mut content = String::new();
 
-            match module.description {
-                Some(desc) => {
-                    content += &module_desc_template(desc);
-                    write_to_file(&path, &filename, &content);
-                },
-                None => {}
-            };
-
-            for class in classes {
-                content += &class_template(class);
+        match module.description {
+            Some(desc) => {
+                content += &module_desc_template(desc);
                 write_to_file(&path, &filename, &content);
-            }
+            },
+            None => {}
+        };
 
-            for function in functions {
-                content += &function_template(function);
-            }
-
+        for class in classes {
+            content += &class_template(class);
             write_to_file(&path, &filename, &content);
         }
+
+        for function in functions {
+            content += &function_template(function);
+        }
+
+        write_to_file(&path, &filename, &content);
+    }
 }
 
 pub fn generate(skip_validations: bool, gen_dir: String, conf_file: &str) {
