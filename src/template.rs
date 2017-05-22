@@ -123,8 +123,22 @@ pub fn class_template(class: Class) -> String {
         None => String::new()
     };
 
+    let mut class_inheritance_bool = false;
+
+    if class.parents.len() > 0 {
+        class_inheritance_bool = true;
+    }
+
+    let mut class_inheritance = String::new();
+    for (index, val) in class.parents.iter().enumerate() {
+        if index != 0 {
+            class_inheritance += ", "
+        }
+        class_inheritance += val
+    }
+
     let class_template = r#"
-class {{ class_name }}:
+class {{ class_name }}{{#class_inheritance_bool}}(class_inferitance){{/class_inheritance_bool}}:
     {{#class_desc_bool}}"""
     {{ class_desc }}
     """{{/class_desc_bool}}
@@ -141,6 +155,8 @@ class {{ class_name }}:
     data = data.insert("class_name", class.name);
     data = data.insert("class_desc", class_desc);
     data = data.insert("class_desc_bool", class_desc_bool);
+    data = data.insert("class_inheritance", class_inheritance);
+    data = data.insert("class_inheritance_bool", class_inheritance_bool);
 
     let mut out = Cursor::new(Vec::new());
     match data.render(class_template, &mut out) {

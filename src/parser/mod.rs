@@ -414,7 +414,7 @@ fn test_item_module_doc_string() {
 #[test]
 fn test_parser_class() {
     let class_content = r#"
-class Animal():
+class Animal:
     def __init__(self):
         pass
 "#;
