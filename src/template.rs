@@ -138,7 +138,7 @@ pub fn class_template(class: Class) -> String {
     }
 
     let class_template = r#"
-class {{ class_name }}{{#class_inheritance_bool}}(class_inferitance){{/class_inheritance_bool}}:
+class {{ class_name }}{{#class_inheritance_bool}}({{class_inheritance}}){{/class_inheritance_bool}}:
     {{#class_desc_bool}}"""
     {{ class_desc }}
     """{{/class_desc_bool}}
@@ -201,6 +201,26 @@ fn test_class_template() {
     let class_template_content = class_template(class);
     let expected_class_template_content = r#"
 class Animal:
+    """
+    This is the animal class.
+    """
+"#;
+
+    assert_eq!(class_template_content, expected_class_template_content);
+}
+
+#[test]
+fn test_class_template_with_inheritance() {
+    let class = Class {
+        name: "Animal".to_string(),
+        description: Some("This is the animal class.".to_string()),
+        parents: vec!("Object".to_string()),
+        methods: Vec::new()
+    };
+
+    let class_template_content = class_template(class);
+    let expected_class_template_content = r#"
+class Animal(Object):
     """
     This is the animal class.
     """

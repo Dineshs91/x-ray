@@ -26,6 +26,7 @@ name = "display"
 [[root.packages.modules.classes]]
 description = "This is the animal class"
 name = "Animal"
+parents = []
 
 [[root.packages.modules.classes.methods]]
 description = "Get the animal instance of this object"
