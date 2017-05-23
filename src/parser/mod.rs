@@ -24,7 +24,6 @@ pub enum ItemKind {
     Code {code: String}
 }
 
-// TODO: Implement module doc string.
 named!(items<Vec<Item>>, many0!(alt!(
     shebang
     |
@@ -143,6 +142,28 @@ named!(parent<Vec<&[u8]>>, do_parse!(
     (parents)
 ));
 
+pub enum ClassBlock {
+    Method (Item),
+    Code (String)
+}
+
+named!(item_class_code<ClassBlock>, do_parse!(
+    many0!(nom::newline) >>
+    code: map_res!(take_until_and_consume!("\n"), std::str::from_utf8) >>
+    (ClassBlock::Code(code.to_string()))
+));
+
+named!(item_class_method<ClassBlock>, do_parse!(
+    method: call!(item_fn) >>
+    (ClassBlock::Method(method))
+));
+
+named!(item_class_block<ClassBlock>, alt!(
+    item_class_method
+    |
+    item_class_code
+));
+
 named!(item_class<Item>, do_parse!(
     many0!(nom::newline) >>
     start_len: many0!(tag!(" ")) >>
@@ -154,9 +175,9 @@ named!(item_class<Item>, do_parse!(
     description: opt!(doc_string) >>
     opt!(util::emptyline) >>
     opt!(take_until_line_containing_tag!("def")) >>
-    methods: many0_block!(start_len.len(), item_fn) >>
+    class_items: many0_block!(start_len.len(), call!(item_class_block)) >>
+    many0!(nom::newline) >>
     (Item {
-
         node: ItemKind::Class {
             name: name.to_string(),
             description: description,
@@ -171,7 +192,13 @@ named!(item_class<Item>, do_parse!(
             },
             methods: {
                 let mut result = Vec::new();
-
+                let mut methods = Vec::new();
+                for class_item in class_items {
+                    match class_item {
+                        ClassBlock::Method(func) => methods.push(func),
+                        ClassBlock::Code(_) => {}
+                    };
+                }
                 for item in methods {
                     match item.node {
                         ItemKind::Function {name, description, parameters} => {
@@ -246,8 +273,19 @@ pub fn parse(source: &[u8]) -> Vec<Item> {
     let item_module_doc_string_result = item_module_doc_string(source).unwrap();
     result.push(item_module_doc_string_result.1);
 
-    let items_result = items(item_module_doc_string_result.0).unwrap();
-    result.extend(items_result.1);
+    // items will parse the entire code. It is a custom nom parser method.
+    // Pass the remaining values to the items parser.
+    let items_result = items(item_module_doc_string_result.0);
+
+    let items_result = match items_result {
+        nom::IResult::Done(_, output) => output,
+        nom::IResult::Error(e) => panic!("Unable to parse [error] {}", e),
+        nom::IResult::Incomplete(n) => {
+            panic!("Unable to parse [Incomplete] {:?}", n);
+        }
+    };
+
+    result.extend(items_result);
 
     result
 }
@@ -784,6 +822,55 @@ def display(msg):
         }
     };
     expected_result.push(function_item);
+
+    let actual_result = items(content.as_bytes());
+    assert_eq!(actual_result.unwrap().1, expected_result);
+}
+
+#[test]
+fn test_parser_items_class_with_non_sequential_methods() {
+    let content = r#"
+class Animal:
+    """
+    This is the animal class.
+    """
+    def __init__(self):
+        """
+        Init method.
+        """
+        for i in range(0, 12):
+            print i
+        pass
+
+    def get_animal(self):
+        """
+        Get the animal instance of this object.
+        """
+        pass
+    copy = __copy__
+"#;
+    let init_method = Function {
+        name: "__init__".to_string(),
+        description: Some("Init method.".to_string()),
+        parameters: vec!["self".to_string()]
+    };
+
+    let get_animal_method = Function {
+        name: "get_animal".to_string(),
+        description: Some("Get the animal instance of this object.".to_string()),
+        parameters: vec!["self".to_string()]
+    };
+
+    let class_item = Item {
+        node: ItemKind::Class {
+            name: "Animal".to_string(),
+            description: Some("This is the animal class.".to_string()),
+            parents: Vec::new(),
+            methods: vec!(init_method, get_animal_method)
+        }
+    };
+    let mut expected_result = Vec::new();
+    expected_result.push(class_item);
 
     let actual_result = items(content.as_bytes());
     assert_eq!(actual_result.unwrap().1, expected_result);

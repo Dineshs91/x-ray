@@ -64,9 +64,11 @@ fn parse_package(dir_path: &PathBuf) -> Package {
     }
 }
 
-fn parse_module(dir_path: &PathBuf, file_name: &str) -> Module {
-    let module_src = util::read_file(dir_path.to_str().unwrap());
+fn parse_module(file_path: &PathBuf, file_name: &str) -> Module {
+    let module_src = util::read_file(file_path.to_str().unwrap());
     let src_bytes = module_src.as_bytes();
+    println!("Parsing file {:?}", file_path);
+
 
     let parsing_result = parser::parse(src_bytes);
     let mut func_vec: Vec<Function> = Vec::new();
