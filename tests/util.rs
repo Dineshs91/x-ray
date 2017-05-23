@@ -33,11 +33,12 @@ pub fn get_current_directory() -> String {
 ///   |--- test_intput/src
 ///   |--- test_output/conf
 ///   |--- test_output/src
-pub fn create_test_dirs() {
-    fs::create_dir_all("tests/test_input/src");
-    fs::create_dir_all("tests/test_input/conf");
-    fs::create_dir_all("tests/test_output/src");
-    fs::create_dir_all("tests/test_output/conf");
+pub fn create_test_dirs() -> ::std::io::Result<()> {
+    fs::create_dir_all("tests/test_input/src")?;
+    fs::create_dir_all("tests/test_input/conf")?;
+    fs::create_dir_all("tests/test_output/src")?;
+    fs::create_dir_all("tests/test_output/conf")?;
+    Ok(())
 }
 
 /// Remove all the files and nested directories in a directory.
@@ -56,7 +57,10 @@ pub fn clean_dir(dir: &Path) -> bool {
                 clean_dir(&path);
 
                 // Remove directory after all the files have been removed.
-                fs::remove_dir(&path);
+                match fs::remove_dir(&path) {
+                    Ok(_) => {},
+                    Err(e) => panic!("Failed to remove directory {} {:?}", e, path)
+                }
             }
         }
         return true;

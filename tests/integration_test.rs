@@ -2,7 +2,6 @@ extern crate x_ray;
 
 mod util;
 
-use std::fs;
 use std::path::Path;
 
 use x_ray::cli::ConfType;
@@ -10,7 +9,7 @@ use x_ray::cli::ConfType;
 
 #[test]
 fn test_src_parse_gen_toml() {
-    util::create_test_dirs();
+    util::create_test_dirs().unwrap();
 
     let conf_file_gen = "tests/test_input/conf/test_gen.toml";
     let conf_file_parse = "tests/test_output/conf/test_parse.toml";
@@ -36,7 +35,7 @@ fn test_src_parse_gen_toml() {
 
 #[test]
 fn test_src_parse_gen_yaml() {
-    util::create_test_dirs();
+    util::create_test_dirs().unwrap();
 
     let conf_file_gen = "tests/test_input/conf/test_gen.yaml";
     let conf_file_parse = "tests/test_output/conf/test_parse.yaml";
@@ -63,10 +62,9 @@ fn test_src_parse_gen_yaml() {
 #[test]
 fn test_src_main() {
     // Create test directories
-    util::create_test_dirs();
+    util::create_test_dirs().unwrap();
 
     let src_input = "tests/test_input/src";
-    let conf_file_parse = "tests/test_output/conf/main.toml";
 
     let actual_output_str = x_ray::parse(src_input, ConfType::Toml);
     let exepected_output_str = 
