@@ -9,9 +9,9 @@ extern crate clap;
 extern crate nom;
 
 pub mod util;
+pub mod cli;
 mod template;
 mod structures;
-mod cli;
 mod parser;
 mod parse;
 mod gen;

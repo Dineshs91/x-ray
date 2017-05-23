@@ -108,6 +108,13 @@ pub fn main() -> CliConf {
     if let Some(matches) = matches.subcommand_matches("parse") {
         parse_dir = Some(matches.value_of("dir").unwrap().to_string());
         conf_file = matches.value_of("conf_file").unwrap();
+        let conf_type_str = matches.value_of("conf_type").unwrap();
+
+        if conf_type_str == "toml" {
+            conf_type = ConfType::Toml;
+        } else if conf_type_str == "yaml" {
+            conf_type = ConfType::Yaml;
+        }
     }
 
     let cli_conf: CliConf = CliConf {

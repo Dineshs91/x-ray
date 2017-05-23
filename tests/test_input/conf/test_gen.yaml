@@ -1,0 +1,48 @@
+---
+root: 
+  name: tests/test_output/src/test_py_project
+  packages: 
+    - 
+      name: api
+      packages: []
+      modules: 
+        - 
+          name: api
+          description: This is the api module
+          functions: 
+            - 
+              name: create_api
+              description: This is the create api function
+              parameters: 
+                - id
+                - new
+          classes: []
+    - 
+      name: sample
+      packages: 
+        - 
+          name: nested_package
+          packages: []
+          modules: []
+      modules: 
+        - 
+          name: display
+          description: This is the display module
+          functions: 
+            - 
+              name: display
+              description: this is the display function
+              parameters: 
+                - msg
+          classes: 
+            - 
+              name: Animal
+              description: This is the animal class
+              parents: []
+              methods: 
+                - 
+                  name: get_animal
+                  description: Get the animal instance of this object
+                  parameters: 
+                    - self
+  modules: []
