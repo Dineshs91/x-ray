@@ -94,7 +94,7 @@ pub fn generate(skip_validations: bool, gen_dir: String, conf_file: &str, conf_t
         validate(&root);
     }
 
-    fs::create_dir_all(&gen_dir);
+    fs::create_dir_all(&gen_dir).expect("Unable to create the provided generate directory");
 
     let root_path = PathBuf::from(gen_dir);
     let root_path = root_path.as_path();

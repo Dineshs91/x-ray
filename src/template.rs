@@ -38,8 +38,8 @@ pub fn function_template(function: Function) -> String {
 def {{func_name}}({{parameters}}):
     {{#func_desc_bool}}"""
     {{func_desc}}
-    """{{/func_desc_bool}}
-    pass
+    """
+    {{/func_desc_bool}}pass
 "#;
 
     let mut function_parameters = String::new();
@@ -74,8 +74,8 @@ pub fn method_template(method: Function) -> String {
     def {{ method_name }}({{method_parameters}}):
         {{#method_desc_bool}}"""
         {{ method_desc }}
-        """{{/method_desc_bool}}
-        pass
+        """
+        {{/method_desc_bool}}pass
 "#;
     let mut method_parameters = String::new();
     let mut i:i32 = 0;
@@ -183,6 +183,23 @@ def display(self, params):
     """
     This is the display function.
     """
+    pass
+"#;
+
+    assert_eq!(function_template_content, expected_function_template_content);
+}
+
+#[test]
+fn test_function_template_without_doc_string() {
+    let function = Function {
+        name: "display".to_string(),
+        description: None,
+        parameters: vec!["self".to_string(), "params".to_string()]
+    };
+
+    let function_template_content = function_template(function);
+    let expected_function_template_content = r#"
+def display(self, params):
     pass
 "#;
 
