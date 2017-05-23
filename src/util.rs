@@ -4,6 +4,7 @@ use std::fs::File;
 use std::path::Path;
 
 use toml;
+use serde_yaml;
 
 use structures::{Config, Root};
 
@@ -38,7 +39,7 @@ pub fn write_to_file(path: &Path, filename: &str, content: &str) {
 
 	let path = path.join(filename);
 	let mut file = match File::create(&path) {
-		Err(e) => panic!("Error occurred while trying to create file {}", e),
+		Err(e) => panic!("Error occurred while trying to create file {} {:?}", e, path),
 		Ok(file) => file,
 	};
 
@@ -57,9 +58,22 @@ pub fn get_toml_result(root: Root) -> String {
     toml_res.to_string()
 }
 
+pub fn get_yaml_result(root: Root) -> String {
+    let config = Config {
+        root: root
+    };
+
+    let yaml_res = serde_yaml::to_string(&config).unwrap();
+    yaml_res.to_string()
+}
+
 /// Write the parsed content to a config file. (Toml/Yaml).
 pub fn write_to_config(conf_file: &str, toml_res: String) {
-    let mut file = fs::File::create(conf_file).unwrap();
+    let file = fs::File::create(conf_file);
+    let mut file = match file {
+        Ok(f) => f,
+        Err(e) => panic!("Error {} {}", e, conf_file)
+    };
 
     file.write_all(toml_res.as_bytes()).expect("Could not write config to file");
 }
@@ -69,7 +83,7 @@ pub fn create_package(package_path: &Path) {
 
 	match fs::create_dir_all(package_path) {
         Ok(_) => {},
-        Err(e) => panic!("Failed to create package {}", e)
+        Err(e) => println!("Failed to create package {}", e)
     };
 
 	let path = package_path.join(init_file_path);

@@ -1,3 +1,4 @@
 language: rust
 rust:
     - stable
+script: cargo build --verbose && cargo test -- --test-threads=1

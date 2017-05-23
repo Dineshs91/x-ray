@@ -6,9 +6,15 @@ const ABOUT: &'static str = "
 x-ray generates python code from a configuration file and vice versa.
 ";
 
+pub enum ConfType {
+    Toml,
+    Yaml
+}
+
 pub struct CliConf {
     pub skip_validations: bool,
     pub conf_file: Option<String>,
+    pub conf_type: ConfType,
     pub parse: bool,
     pub parse_dir: Option<String>,
     pub gen_dir: Option<String>,
@@ -41,6 +47,11 @@ pub fn main() -> CliConf {
                 .value_name("conf_file")
                 .required(true)
                 .help("Provide the conf file"))
+            .arg(Arg::with_name("conf_type")
+                .short("t")
+                .value_name("conf_type")
+                .required(true)
+                .help("Provide the config type (Toml/Yaml)"))
             .arg(Arg::with_name("dir")
                 .short("d")
                 .value_name("dir")
@@ -56,14 +67,21 @@ pub fn main() -> CliConf {
                 .short("f")
                 .value_name("conf_file")
                 .required(true)
-                .help("Provide the name of the conf file ")));
+                .help("Provide the name of the conf file "))
+            .arg(Arg::with_name("conf_type")
+                .short("t")
+                .value_name("conf_type")
+                .required(true)
+                .help("Provide the config type (Toml/Yaml)")));
 
     let matches = app.get_matches();
 
     let mut skip_validations: bool = false;
     let mut conf_file = "";
+    let mut conf_type = ConfType::Toml;
     let mut parse_dir = None;
     let mut gen_dir = Some(get_current_directory());
+
     if let Some(matches) = matches.subcommand_matches("gen") {
         if matches.is_present("skip_validations") {
             println!("Skipping python validations");
@@ -71,6 +89,14 @@ pub fn main() -> CliConf {
         }
 
         conf_file = matches.value_of("conf_file").unwrap();
+        let conf_type_str = matches.value_of("conf_type").unwrap();
+
+        if conf_type_str == "toml" {
+            conf_type = ConfType::Toml;
+        } else if conf_type_str == "yaml" {
+            conf_type = ConfType::Yaml;
+        }
+
         gen_dir = Some(matches.value_of("dir").unwrap().to_string());
     }
 
@@ -82,11 +108,19 @@ pub fn main() -> CliConf {
     if let Some(matches) = matches.subcommand_matches("parse") {
         parse_dir = Some(matches.value_of("dir").unwrap().to_string());
         conf_file = matches.value_of("conf_file").unwrap();
+        let conf_type_str = matches.value_of("conf_type").unwrap();
+
+        if conf_type_str == "toml" {
+            conf_type = ConfType::Toml;
+        } else if conf_type_str == "yaml" {
+            conf_type = ConfType::Yaml;
+        }
     }
 
     let cli_conf: CliConf = CliConf {
         skip_validations: skip_validations,
         conf_file: Some(conf_file.to_string()),
+        conf_type: conf_type,
         parse: parse,
         parse_dir: parse_dir,
         gen_dir: gen_dir
