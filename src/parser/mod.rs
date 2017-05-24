@@ -41,6 +41,7 @@ named!(items<Vec<Item>>, many0!(alt!(
 named!(item_code<Item>, do_parse!(
     many0!(nom::newline) >>
     code: map_res!(take_until_and_consume!("\n"), std::str::from_utf8) >>
+    many0!(nom::newline) >>
     (Item {
         node: ItemKind::Code {
             code: code.to_string()
@@ -231,7 +232,8 @@ named!(item_fn<Item>, do_parse!(
     ws!(tag!("):")) >>
     opt!(nom::newline) >>
     description: opt!(doc_string) >>
-    block!(start_len.len()) >>
+    has_data: has_data!() >>
+    cond!(has_data, block!(start_len.len())) >>
 
     (Item {
         node: ItemKind::Function {
@@ -459,14 +461,10 @@ class Animal:
 
     let result = item_class(class_content.as_bytes());
 
-    let mut params: Vec<String> = Vec::new();
-
-    params.push("self".to_string());
-
     let method = Function {
         name: "__init__".to_string(),
         description: None,
-        parameters: params
+        parameters: vec!("self".to_string())
     };
 
     let item_kind = ItemKind::Class {
@@ -623,6 +621,29 @@ def hello(args):
             parameters: vec!("args".to_string())
         }
     };
+
+    assert_eq!(result.unwrap().1, expected_result);
+}
+
+#[test]
+fn test_parser_item_fn_with_only_doc_strings() {
+    let fn_content = r#"
+def hello(args):
+    """
+    This is the hello function.
+    """
+"#;
+
+    let result = items(fn_content.trim().as_bytes());
+
+    let mut expected_result = Vec::new();
+    expected_result.push(Item {
+        node: ItemKind::Function {
+            name: "hello".to_string(),
+            description: Some("This is the hello function.".to_string()),
+            parameters: vec!("args".to_string())
+        }
+    });
 
     assert_eq!(result.unwrap().1, expected_result);
 }

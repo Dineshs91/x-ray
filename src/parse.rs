@@ -66,6 +66,7 @@ fn parse_package(dir_path: &PathBuf) -> Package {
 
 fn parse_module(file_path: &PathBuf, file_name: &str) -> Module {
     let module_src = util::read_file(file_path.to_str().unwrap());
+    let module_src = module_src.trim();
     let src_bytes = module_src.as_bytes();
     println!("Parsing file {:?}", file_path);
 

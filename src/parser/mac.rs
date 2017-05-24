@@ -148,3 +148,17 @@ macro_rules! take_until_line_containing_tag (
     }
   );
 );
+
+#[macro_export]
+macro_rules! has_data (
+  ($i:expr,) => (
+    {
+      use nom::InputLength;
+      if ($i).input_len() == 0 {
+        nom::IResult::Done($i, false)
+      } else {
+        nom::IResult::Done($i, true)
+      }
+    }
+  );
+);
