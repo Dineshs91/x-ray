@@ -170,7 +170,7 @@ named!(item_class<Item>, do_parse!(
     start_len: many0!(tag!(" ")) >>
     tag!("class") >>
     many1!(nom::space) >>
-    name: map_res!(nom::alpha, std::str::from_utf8) >>
+    name: map_res!(util::ident, std::str::from_utf8) >>
     parents: opt!(parent) >>
     tag!(":") >>
     description: opt!(doc_string) >>
