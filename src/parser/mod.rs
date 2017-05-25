@@ -283,7 +283,8 @@ pub fn parse(source: &[u8]) -> Vec<Item> {
         nom::IResult::Done(_, output) => output,
         nom::IResult::Error(e) => panic!("Unable to parse [error] {}", e),
         nom::IResult::Incomplete(n) => {
-            panic!("Unable to parse [Incomplete] {:?}", n);
+            println!("Unable to parse [Incomplete] {:?}", n);
+            Vec::new()
         }
     };
 
