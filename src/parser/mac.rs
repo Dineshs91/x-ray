@@ -114,9 +114,9 @@ macro_rules! many0_block(
   );
 );
 
-// Take until a line containing a given tag.
-// starting from \n to the next \n see if the content has the tag.
-// If it has then consume until the previous line. Else consume the line.
+/// Take until a line containing a given tag.
+/// starting from \n to the next \n see if the content has the tag.
+/// If it has then consume until the previous line. Else consume the line.
 #[macro_export]
 macro_rules! take_until_line_containing_tag (
   ($i:expr, $substr:expr) => (
@@ -149,6 +149,7 @@ macro_rules! take_until_line_containing_tag (
   );
 );
 
+/// Returns false if there is no data remaining. Else returns true.
 #[macro_export]
 macro_rules! has_data (
   ($i:expr,) => (
